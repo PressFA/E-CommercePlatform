@@ -1,0 +1,17 @@
+server:
+  port: 50001
+
+spring:
+  application:
+    name: UserMS
+  # Database (H2)
+  datasource:
+    username: test
+    password: test
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
