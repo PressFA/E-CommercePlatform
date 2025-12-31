@@ -4,14 +4,8 @@ server:
 spring:
   application:
     name: UserMS
-  # Database (H2)
-  datasource:
-    username: test
-    password: test
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-  h2:
-    console:
-      enabled: true
+  config:
+    import:
+      - classpath:application-db.yaml # Database (H2)
+      - classpath:application-kafka-consumer.yaml # Kafka Consumer
+      - classpath:application-kafka-producer.yaml # Kafka Producer

@@ -21,5 +21,7 @@ public class UserEntity {
     private String name;
     @Column(nullable = false)
     private BigDecimal balance;
+    @Version
+    private int version;
 }
 

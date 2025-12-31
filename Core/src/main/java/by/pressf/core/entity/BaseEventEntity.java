@@ -1,11 +1,17 @@
 package by.pressf.core.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-@MappedSuperclass
+@SuperBuilder
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@MappedSuperclass
 public abstract class BaseEventEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
