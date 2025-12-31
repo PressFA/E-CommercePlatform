@@ -4,9 +4,14 @@ spring:
       bootstrap-servers: localhost:9092,localhost:9094,localhost:9096
       transaction-id-prefix: user-ms-${HOSTNAME:local}- # Для корректной работы Kafka Transaction
       acks: all # Одно из условий для Idempotence Producer
+      retries: 10
       properties:
         enable.idempotence: true # Явно включаем Idempotence Producer
         max.in.flight.requests.per.connection: 5 # Одно из условий для Idempotence Producer
+        retry.backoff.ms: 1000
+        delivery.timeout.ms: 60000
+        linger.ms: 0
+        request.timeout.ms: 30000
 
 user:
   events:

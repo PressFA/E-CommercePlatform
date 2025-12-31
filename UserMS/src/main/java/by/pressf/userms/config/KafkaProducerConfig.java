@@ -39,6 +39,16 @@ public class KafkaProducerConfig {
                 env.getRequiredProperty("spring.kafka.producer.properties.enable.idempotence"));
         config.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG,
                 env.getRequiredProperty("spring.kafka.producer.transaction-id-prefix"));
+        config.put(ProducerConfig.RETRIES_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.retries"));
+        config.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.properties.retry.backoff.ms"));
+        config.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.properties.delivery.timeout.ms"));
+        config.put(ProducerConfig.LINGER_MS_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.properties.linger.ms"));
+        config.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.properties.request.timeout.ms"));
 
         return new DefaultKafkaProducerFactory<>(config);
     }

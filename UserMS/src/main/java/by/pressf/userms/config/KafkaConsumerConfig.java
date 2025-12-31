@@ -82,6 +82,25 @@ public class KafkaConsumerConfig {
                 env.getRequiredProperty("spring.kafka.consumer.bootstrap-servers"));
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
+        config.put(ProducerConfig.ACKS_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.acks"));
+        config.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,
+                env.getRequiredProperty("spring.kafka.producer.properties.max.in.flight.requests.per.connection"));
+        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.properties.enable.idempotence"));
+        config.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG,
+                env.getRequiredProperty("dead.letter.topic.transaction-id-prefix"));
+        config.put(ProducerConfig.RETRIES_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.retries"));
+        config.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.properties.retry.backoff.ms"));
+        config.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.properties.delivery.timeout.ms"));
+        config.put(ProducerConfig.LINGER_MS_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.properties.linger.ms"));
+        config.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.properties.request.timeout.ms"));
+
 
         return new DefaultKafkaProducerFactory<>(config);
     }

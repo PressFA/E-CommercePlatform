@@ -14,3 +14,4 @@ dead:
   letter:
     topic:
       name: user-ms-dlt
+      transaction-id-prefix: user-ms-dlt-${HOSTNAME:local}-
