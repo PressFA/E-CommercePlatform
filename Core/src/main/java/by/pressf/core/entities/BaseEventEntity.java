@@ -1,4 +1,4 @@
-package by.pressf.core.entity;
+package by.pressf.core.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

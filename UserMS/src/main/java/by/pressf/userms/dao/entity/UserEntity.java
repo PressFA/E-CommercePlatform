@@ -9,10 +9,9 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-@Data
+@Data @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity @Table(name = "users")
 public class UserEntity {
     @Id @GeneratedValue(strategy = GenerationType.UUID)

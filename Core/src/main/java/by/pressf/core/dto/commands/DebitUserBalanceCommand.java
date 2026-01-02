@@ -1,4 +1,4 @@
-package by.pressf.core.command;
+package by.pressf.core.dto.commands;
 
 import java.math.BigDecimal;
 import java.util.UUID;

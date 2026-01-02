@@ -1,4 +1,4 @@
-package by.pressf.userms.config;
+package by.pressf.paymentms.config;
 
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;

@@ -1,4 +1,4 @@
-package by.pressf.userms.dao.entity;
+package by.pressf.paymentms.dao.entity;
 
 import by.pressf.core.entities.BaseEventEntity;
 import jakarta.persistence.Entity;

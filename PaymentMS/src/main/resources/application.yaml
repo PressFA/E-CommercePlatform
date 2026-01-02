@@ -1,0 +1,14 @@
+server:
+  port: 50002
+
+spring:
+  application:
+    name: PaymentMS
+  config:
+    import:
+      - classpath:application-db.yaml # Database (H2)
+      - classpath:application-kafka-consumer.yaml # Kafka Consumer
+      - classpath:application-kafka-producer.yaml # Kafka Producer
+
+stripe:
+  api-key: sk_test_51Sicxz4saHceZPNSIcwqlrpBCPZs4nWX2fSsgmY0YnBHLu9qyAOSbXpdQYe46DUvbnKpe7RG8QKzS3d50zkDV8L50045ZdI4e5

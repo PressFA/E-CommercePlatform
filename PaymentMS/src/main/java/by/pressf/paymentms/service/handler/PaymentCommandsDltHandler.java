@@ -1,9 +1,9 @@
-package by.pressf.userms.service.handler;
+package by.pressf.paymentms.service.handler;
 
-import by.pressf.core.dto.commands.DebitUserBalanceCommand;
-import by.pressf.core.dto.events.UserBalanceDebitFailedEvent;
-import by.pressf.userms.dao.entity.EventEntity;
-import by.pressf.userms.dao.repository.EventRepository;
+import by.pressf.core.dto.commands.ChargePaymentCommand;
+import by.pressf.core.dto.events.PaymentChargeFailedEvent;
+import by.pressf.paymentms.dao.entity.EventEntity;
+import by.pressf.paymentms.dao.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -21,39 +21,39 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = "${dead.letter.topic.name}", groupId = "user-ms")
-public class UserCommandsDltHandler {
+@KafkaListener(topics = "${dead.letter.topic.name}", groupId = "payment-ms")
+public class PaymentCommandsDltHandler {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final EventRepository eventRepository;
 
     @KafkaHandler
     @Transactional("jpaTransactionManager")
-    public void handleDlt(@Payload DebitUserBalanceCommand command,
+    public void handleDlt(@Payload ChargePaymentCommand command,
                           @Header("messageId") String messageId) {
-        log.info("Dead message DebitUserBalanceCommand received from user-commands topic");
+        log.info("Dead message ChargePaymentCommand received from user-commands topic");
 
         EventEntity processedEvent = eventRepository.findByMessageId(messageId);
         if (processedEvent != null) {
-            log.info("The dead DebitUserBalanceCommand message with messageId={} has already been processed", messageId);
+            log.info("The dead ChargePaymentCommand message with messageId={} has already been processed", messageId);
             return;
         }
 
-        UserBalanceDebitFailedEvent failedEvent = new UserBalanceDebitFailedEvent(command.orderId());
+        PaymentChargeFailedEvent failedEvent = new PaymentChargeFailedEvent(command.orderId());
         ProducerRecord<String, Object> record =
                 new ProducerRecord<>(
-                        env.getRequiredProperty("user.events.topic.name"),
+                        env.getRequiredProperty("payment.events.topic.name"),
                         command.orderId().toString(),
                         failedEvent
                 );
         record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
         kafkaTemplate.send(record);
-        log.info("The UserBalanceDebitFailedEvent message was sent to the user-events topic.");
+        log.info("The PaymentChargeFailedEvent message was sent to the payment-events topic.");
 
         eventRepository.save(EventEntity.builder()
                 .messageId(messageId)
                 .build());
-        log.info("Dead message DebitUserBalanceCommand with messageId={} has been processed", messageId);
+        log.info("Dead message ChargePaymentCommand with messageId={} has been processed", messageId);
     }
 }

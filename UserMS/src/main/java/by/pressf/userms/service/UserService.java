@@ -6,10 +6,8 @@ import by.pressf.userms.dto.DebitUserBalanceRequest;
 import by.pressf.userms.exception.InsufficientBalanceException;
 import by.pressf.userms.exception.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {

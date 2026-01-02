@@ -1,4 +1,4 @@
-package by.pressf.core.exception;
+package by.pressf.core.exceptions;
 
 public class RetryableException extends RuntimeException {
     public RetryableException(String message) {

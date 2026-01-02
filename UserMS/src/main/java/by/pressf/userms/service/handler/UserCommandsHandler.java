@@ -1,9 +1,9 @@
 package by.pressf.userms.service.handler;
 
-import by.pressf.core.command.DebitUserBalanceCommand;
-import by.pressf.core.event.UserBalanceDebitedEvent;
-import by.pressf.core.exception.NotRetryableException;
-import by.pressf.core.exception.RetryableException;
+import by.pressf.core.dto.commands.DebitUserBalanceCommand;
+import by.pressf.core.dto.events.UserBalanceDebitedEvent;
+import by.pressf.core.exceptions.NotRetryableException;
+import by.pressf.core.exceptions.RetryableException;
 import by.pressf.userms.dao.entity.EventEntity;
 import by.pressf.userms.dao.repository.EventRepository;
 import by.pressf.userms.dto.DebitUserBalanceRequest;

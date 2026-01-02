@@ -1,4 +1,4 @@
-package by.pressf.core.event;
+package by.pressf.core.dto.events;
 
 import java.util.UUID;
 

@@ -1,4 +1,4 @@
-package by.pressf.core.exception;
+package by.pressf.core.exceptions;
 
 public class NotRetryableException extends RuntimeException {
     public NotRetryableException(String message) { super(message); }
