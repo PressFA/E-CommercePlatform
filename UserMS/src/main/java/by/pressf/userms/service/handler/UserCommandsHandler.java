@@ -52,7 +52,11 @@ public class UserCommandsHandler {
             userService.debitUserBalance(new DebitUserBalanceRequest(command.userId(), command.amount()));
             log.info("Debiting a user's balance with id {}", command.userId());
 
-            UserBalanceDebitedEvent event = new UserBalanceDebitedEvent(command.orderId());
+            UserBalanceDebitedEvent event = new UserBalanceDebitedEvent(
+                    command.orderId(),
+                    command.userId(),
+                    command.amount()
+            );
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
