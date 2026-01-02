@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.core.env.Environment;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.kafka.annotation.KafkaHandler;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -68,12 +69,12 @@ public class UserCommandsHandler {
                     .messageId(messageId)
                     .build());
             log.info("The DebitUserBalanceCommand message with messageId={} has been processed", messageId);
-        } catch (UserNotFoundException | InsufficientBalanceException e) {
-            log.error(e.getMessage());
-            throw new NotRetryableException(e);
         } catch (OptimisticLockingFailureException e) {
             log.error(e.getMessage());
             throw new RetryableException(e);
+        } catch (UserNotFoundException | InsufficientBalanceException | DataAccessException e) {
+            log.error(e.getMessage());
+            throw new NotRetryableException(e);
         }
     }
 }

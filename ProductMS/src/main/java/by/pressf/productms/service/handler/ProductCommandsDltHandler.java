@@ -1,9 +1,9 @@
-package by.pressf.paymentms.service.handler;
+package by.pressf.productms.service.handler;
 
-import by.pressf.core.dto.commands.ChargePaymentCommand;
-import by.pressf.core.dto.events.PaymentChargeFailedEvent;
-import by.pressf.paymentms.dao.entity.EventEntity;
-import by.pressf.paymentms.dao.repository.EventRepository;
+import by.pressf.core.dto.commands.ReserveProductCommand;
+import by.pressf.core.dto.events.ProductReservationFailedEvent;
+import by.pressf.productms.dao.entity.EventEntity;
+import by.pressf.productms.dao.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -21,39 +21,39 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = "${dead.letter.topic.name}", groupId = "payment-ms")
-public class PaymentCommandsDltHandler {
+@KafkaListener(topics = "${dead.letter.topic.name}", groupId = "product-ms")
+public class ProductCommandsDltHandler {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final EventRepository eventRepository;
 
     @KafkaHandler
     @Transactional("jpaTransactionManager")
-    public void handleDlt(@Payload ChargePaymentCommand command,
-                          @Header("messageId") String messageId) {
-        log.info("Dead message ChargePaymentCommand received from payment-commands topic");
+    public void handleCommand(@Payload ReserveProductCommand command,
+                              @Header("messageId") String messageId) {
+        log.info("Dead message ReserveProductCommand received from user-commands topic");
 
         EventEntity processedEvent = eventRepository.findByMessageId(messageId);
         if (processedEvent != null) {
-            log.info("The dead ChargePaymentCommand message with messageId={} has already been processed", messageId);
+            log.info("The dead ReserveProductCommand message with messageId={} has already been processed", messageId);
             return;
         }
 
-        PaymentChargeFailedEvent failedEvent = new PaymentChargeFailedEvent(command.orderId());
+        ProductReservationFailedEvent failedEvent = new ProductReservationFailedEvent(command.orderId());
         ProducerRecord<String, Object> record =
                 new ProducerRecord<>(
-                        env.getRequiredProperty("payment.events.topic.name"),
+                        env.getRequiredProperty("product.events.topic.name"),
                         command.orderId().toString(),
                         failedEvent
                 );
         record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
         kafkaTemplate.send(record);
-        log.info("The PaymentChargeFailedEvent message was sent to the payment-events topic.");
+        log.info("The ProductReservationFailedEvent message was sent to the product-events topic.");
 
         eventRepository.save(EventEntity.builder()
                 .messageId(messageId)
                 .build());
-        log.info("Dead message ChargePaymentCommand with messageId={} has been processed", messageId);
+        log.info("Dead message ReserveProductCommand with messageId={} has been processed", messageId);
     }
 }

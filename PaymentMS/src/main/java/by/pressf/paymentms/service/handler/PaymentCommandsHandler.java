@@ -39,7 +39,7 @@ public class PaymentCommandsHandler {
     public void handleCommand(@Payload ChargePaymentCommand command,
                               @Header("messageId") String messageId) {
         try {
-            log.info("The ChargePaymentCommand command from the user-commands topic has been received");
+            log.info("The ChargePaymentCommand command from the payment-commands topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {

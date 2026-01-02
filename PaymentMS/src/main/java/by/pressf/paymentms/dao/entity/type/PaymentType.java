@@ -1,4 +1,4 @@
-package by.pressf.paymentms.dao.entity.types;
+package by.pressf.paymentms.dao.entity.type;
 
 public enum PaymentType {
     TOP_UP,

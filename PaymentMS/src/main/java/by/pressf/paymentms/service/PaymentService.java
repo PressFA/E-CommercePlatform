@@ -1,7 +1,7 @@
 package by.pressf.paymentms.service;
 
 import by.pressf.paymentms.dao.entity.PaymentEntity;
-import by.pressf.paymentms.dao.entity.types.PaymentType;
+import by.pressf.paymentms.dao.entity.type.PaymentType;
 import by.pressf.paymentms.dao.repository.PaymentRepository;
 import by.pressf.paymentms.dto.CreateOrderPaymentRequest;
 import by.pressf.paymentms.exception.PaymentFailedException;

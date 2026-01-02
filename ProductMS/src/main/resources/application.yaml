@@ -1,0 +1,11 @@
+server:
+  port: 50003
+
+spring:
+  application:
+    name: ProductMs
+  config:
+    import:
+      - classpath:application-db.yaml # Database (H2)
+      - classpath:application-kafka-consumer.yaml # Kafka Consumer
+      - classpath:application-kafka-producer.yaml # Kafka Producer

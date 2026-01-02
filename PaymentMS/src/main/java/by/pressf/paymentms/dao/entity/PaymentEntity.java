@@ -1,6 +1,6 @@
 package by.pressf.paymentms.dao.entity;
 
-import by.pressf.paymentms.dao.entity.types.PaymentType;
+import by.pressf.paymentms.dao.entity.type.PaymentType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
