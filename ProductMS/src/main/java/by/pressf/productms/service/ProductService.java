@@ -22,26 +22,26 @@ public class ProductService {
     private final ProductHistoryRepository productHistoryRepository;
 
     public BigDecimal reserveProduct(ProductReservationRequest req) {
-        ProductEntity entity = productRepository.findById(req.productId())
+        ProductEntity product = productRepository.findById(req.productId())
                 .orElseThrow(() -> new ProductNotFoundException(req.productId()));
 
-        if (req.quantity() > entity.getQuantity()) {
+        if (req.quantity() > product.getQuantity()) {
             throw new ProductInsufficientException(req.productId(), req.orderId());
         }
 
-        entity.setQuantity(entity.getQuantity() - req.quantity());
-        productRepository.save(entity);
+        product.setQuantity(product.getQuantity() - req.quantity());
+        productRepository.save(product);
 
-        ProductHistoryEntity historyEntity = ProductHistoryEntity.builder()
+        ProductHistoryEntity productHistory = ProductHistoryEntity.builder()
                 .orderId(req.orderId())
-                .product(entity)
+                .product(product)
                 .quantity(req.quantity())
                 .createdAt(LocalDateTime.now())
                 .status(ProductStatus.RESERVED)
                 .build();
-        productHistoryRepository.save(historyEntity);
+        productHistoryRepository.save(productHistory);
 
-        return entity.getPrice().multiply(new BigDecimal(req.quantity()));
+        return product.getPrice().multiply(new BigDecimal(req.quantity()));
     }
 
     public void confirmProductOrder(UUID orderId) {
@@ -51,5 +51,20 @@ public class ProductService {
         entity.setUpdatedAt(LocalDateTime.now());
 
         productHistoryRepository.save(entity);
+    }
+
+    public void cancelProductReservation(UUID orderId) {
+        ProductHistoryEntity productHistory = productHistoryRepository.findByOrderId(orderId);
+
+        ProductEntity product = productRepository.findById(productHistory.getProduct().getId())
+                .orElseThrow(() -> new ProductNotFoundException(productHistory.getProduct().getId()));
+
+        product.setQuantity(product.getQuantity() + productHistory.getQuantity());
+        productRepository.save(product);
+
+        productHistory.setStatus(ProductStatus.CANCELLED);
+        productHistory.setUpdatedAt(LocalDateTime.now());
+
+        productHistoryRepository.save(productHistory);
     }
 }

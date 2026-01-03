@@ -1,6 +1,7 @@
 package by.pressf.orderms.service.handler;
 
 import by.pressf.core.dto.commands.ConfirmOrderCommand;
+import by.pressf.core.dto.commands.RejectOrderCommand;
 import by.pressf.core.dto.events.OrderCompletedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.dao.entity.EventEntity;
@@ -64,6 +65,32 @@ public class OrderCommandsHandler {
                     .messageId(messageId)
                     .build());
             log.info("The ConfirmOrderCommand message with messageId={} has been processed", messageId);
+        } catch (OrderNotFoundException | DataAccessException e) {
+            log.error(e.getMessage());
+            throw new NotRetryableException(e);
+        }
+    }
+
+    @KafkaHandler
+    @Transactional("jpaTransactionManager")
+    public void handleCommand(@Payload RejectOrderCommand command,
+                              @Header("messageId") String messageId) {
+        try {
+            log.info("The RejectOrderCommand command from the order-commands topic has been received");
+
+            EventEntity processedEvent = eventRepository.findByMessageId(messageId);
+            if (processedEvent != null) {
+                log.info("The RejectOrderCommand message with messageId={} has already been processed", messageId);
+                return;
+            }
+
+            orderService.rejectOrder(command.orderId());
+            log.info("The order with ID {} has been rejected", command.orderId());
+
+            eventRepository.save(EventEntity.builder()
+                    .messageId(messageId)
+                    .build());
+            log.info("The RejectOrderCommand message with messageId={} has been processed", messageId);
         } catch (OrderNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);

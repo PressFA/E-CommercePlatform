@@ -2,6 +2,7 @@ package by.pressf.userms.service;
 
 import by.pressf.userms.dao.entity.UserEntity;
 import by.pressf.userms.dao.repository.UserRepository;
+import by.pressf.userms.dto.CreditUserBalanceRequest;
 import by.pressf.userms.dto.DebitUserBalanceRequest;
 import by.pressf.userms.exception.InsufficientBalanceException;
 import by.pressf.userms.exception.UserNotFoundException;
@@ -22,6 +23,15 @@ public class UserService {
         }
 
         user.setBalance(user.getBalance().subtract(req.amount()));
+        userRepository.save(user);
+    }
+
+    public void creditUserBalance(CreditUserBalanceRequest req) {
+        UserEntity user = userRepository.findById(req.userId())
+                .orElseThrow(() -> new UserNotFoundException(req.userId()));
+
+        user.setBalance(user.getBalance().add(req.amount()));
+
         userRepository.save(user);
     }
 }

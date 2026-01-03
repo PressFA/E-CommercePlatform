@@ -1,7 +1,9 @@
 package by.pressf.productms.service.handler;
 
+import by.pressf.core.dto.commands.CancelProductReservationCommand;
 import by.pressf.core.dto.commands.ConfirmOrderCommand;
 import by.pressf.core.dto.commands.ReserveProductCommand;
+import by.pressf.core.dto.events.ProductReservationCanceledEvent;
 import by.pressf.core.dto.events.ProductReservedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
@@ -113,6 +115,47 @@ public class ProductCommandsHandler {
                     .build());
             log.info("The ConfirmOrderCommand message with messageId={} has been processed", messageId);
         } catch (DataAccessException e) {
+            log.error(e.getMessage());
+            throw new NotRetryableException(e);
+        }
+    }
+
+    @KafkaHandler
+    @Transactional("jpaTransactionManager")
+    public void handleCommand(@Payload CancelProductReservationCommand command,
+                              @Header("messageId") String messageId) {
+        try {
+            log.info("The CancelProductReservationCommand command from the product-commands topic has been received");
+
+            EventEntity processedEvent = eventRepository.findByMessageId(messageId);
+            if (processedEvent != null) {
+                log.info("The CancelProductReservationCommand message with messageId={} has already been processed", messageId);
+                return;
+            }
+
+            productService.cancelProductReservation(command.orderId());
+            log.info("The product from the order with ID {} has been removed from the reservation", command.orderId());
+
+            ProductReservationCanceledEvent event = new ProductReservationCanceledEvent(command.orderId());
+            ProducerRecord<String, Object> record =
+                    new ProducerRecord<>(
+                            env.getRequiredProperty("product.events.topic.name"),
+                            command.orderId().toString(),
+                            event
+                    );
+            record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
+
+            kafkaTemplate.send(record);
+            log.info("The ProductReservationCanceledEvent message was sent to the product-events topic.");
+
+            eventRepository.save(EventEntity.builder()
+                    .messageId(messageId)
+                    .build());
+            log.info("The CancelProductReservationCommand message with messageId={} has been processed", messageId);
+        } catch (OptimisticLockingFailureException e) {
+            log.error(e.getMessage());
+            throw new RetryableException(e);
+        } catch (ProductNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
         }

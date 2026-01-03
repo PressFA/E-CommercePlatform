@@ -1,11 +1,14 @@
 package by.pressf.userms.service.handler;
 
+import by.pressf.core.dto.commands.CancelUserBalanceDebitCommand;
 import by.pressf.core.dto.commands.DebitUserBalanceCommand;
+import by.pressf.core.dto.events.UserBalanceDebitCanceledEvent;
 import by.pressf.core.dto.events.UserBalanceDebitedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import by.pressf.userms.dao.entity.EventEntity;
 import by.pressf.userms.dao.repository.EventRepository;
+import by.pressf.userms.dto.CreditUserBalanceRequest;
 import by.pressf.userms.dto.DebitUserBalanceRequest;
 import by.pressf.userms.exception.InsufficientBalanceException;
 import by.pressf.userms.exception.UserNotFoundException;
@@ -67,7 +70,7 @@ public class UserCommandsHandler {
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The UserBalanceDebitedEvent message was sent to the user-events topic.");
+            log.info("The UserBalanceDebitedEvent message was sent to the user-events topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
@@ -77,6 +80,47 @@ public class UserCommandsHandler {
             log.error(e.getMessage());
             throw new RetryableException(e);
         } catch (UserNotFoundException | InsufficientBalanceException | DataAccessException e) {
+            log.error(e.getMessage());
+            throw new NotRetryableException(e);
+        }
+    }
+
+    @KafkaHandler
+    @Transactional("jpaTransactionManager")
+    public void handleCommand(@Payload CancelUserBalanceDebitCommand command,
+                              @Header("messageId") String messageId) {
+        try {
+            log.info("The CancelUserBalanceDebitCommand command from the user-commands topic has been received");
+
+            EventEntity processedEvent = eventRepository.findByMessageId(messageId);
+            if (processedEvent != null) {
+                log.info("The CancelUserBalanceDebitCommand message with messageId={} has already been processed", messageId);
+                return;
+            }
+
+            userService.creditUserBalance(new CreditUserBalanceRequest(command.userId(), command.amount()));
+            log.info("The balance of the user with ID {} has been topped up", command.userId());
+
+            UserBalanceDebitCanceledEvent event = new UserBalanceDebitCanceledEvent(command.orderId());
+            ProducerRecord<String, Object> record =
+                    new ProducerRecord<>(
+                            env.getRequiredProperty("user.events.topic.name"),
+                            command.orderId().toString(),
+                            event
+                    );
+            record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
+
+            kafkaTemplate.send(record);
+            log.info("The UserBalanceDebitCanceledEvent message was sent to the user-events topic");
+
+            eventRepository.save(EventEntity.builder()
+                    .messageId(messageId)
+                    .build());
+            log.info("The CancelUserBalanceDebitCommand message with messageId={} has been processed", messageId);
+        } catch (OptimisticLockingFailureException e) {
+            log.error(e.getMessage());
+            throw new RetryableException(e);
+        } catch (UserNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
         }

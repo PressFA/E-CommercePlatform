@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -34,6 +35,28 @@ public class PaymentService {
                     .build();
 
             paymentRepository.save(payment);
+        } catch (StripeException e) {
+            throw new PaymentFailedException("A payment gateway error has occurred.", e.getStatusCode());
+        }
+    }
+
+    public void refundOrderPayment(UUID orderId) {
+        try {
+            PaymentEntity payment = paymentRepository.findByOrderId(orderId);
+
+            log.info("Sending a refund to the bank gateway");
+            stripeService.createRefundPayment(payment.getAmount());
+            log.info("The refund sent to the bank gateway was successfully completed");
+
+            PaymentEntity createPayment = PaymentEntity.builder()
+                    .userId(payment.getUserId())
+                    .orderId(payment.getOrderId())
+                    .amount(payment.getAmount())
+                    .createdAt(LocalDateTime.now())
+                    .type(PaymentType.REFUND)
+                    .build();
+
+            paymentRepository.save(createPayment);
         } catch (StripeException e) {
             throw new PaymentFailedException("A payment gateway error has occurred.", e.getStatusCode());
         }

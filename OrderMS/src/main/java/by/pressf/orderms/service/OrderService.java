@@ -22,4 +22,13 @@ public class OrderService {
 
         orderRepository.save(entity);
     }
+
+    public void rejectOrder(UUID orderId) {
+        OrderEntity entity = orderRepository.findById(orderId)
+                .orElseThrow(() -> new OrderNotFoundException(orderId));
+
+        entity.setStatus(OrderStatus.REJECTED);
+
+        orderRepository.save(entity);
+    }
 }
