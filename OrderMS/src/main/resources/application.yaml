@@ -9,3 +9,4 @@ spring:
       - classpath:application-db.yaml # Database (H2)
       - classpath:application-kafka-consumer.yaml # Kafka Consumer
       - classpath:application-kafka-producer.yaml # Kafka Producer
+      - classpath:kafka-saga-topics.yaml # Commands Topic's

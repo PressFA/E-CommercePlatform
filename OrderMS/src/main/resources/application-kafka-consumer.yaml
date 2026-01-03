@@ -6,10 +6,6 @@ spring:
       properties:
         spring.json.trusted.packages: by.pressf.core
 
-order:
-  commands:
-    topic:
-      name: order-commands
 dead:
   letter:
     topic:

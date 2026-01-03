@@ -29,7 +29,7 @@ public class KafkaConsumerConfig {
     private final Environment env;
 
     @Bean
-    ConsumerFactory<String, String> consumerFactory() {
+    ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
                 env.getRequiredProperty("spring.kafka.consumer.bootstrap-servers"));

@@ -1,0 +1,57 @@
+order:
+  events:
+    topic:
+      name: order-events
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
+  commands:
+    topic:
+      name: order-commands
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
+product:
+  events:
+    topic:
+      name: product-events
+  commands:
+    topic:
+      name: product-commands
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
+payment:
+  events:
+    topic:
+      name: payment-events
+  commands:
+    topic:
+      name: payment-commands
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
+user:
+  events:
+    topic:
+      name: user-events
+  commands:
+    topic:
+      name: user-commands
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
+saga:
+  dlt:
+    name: saga-order-dlt
+    transaction-id-prefix: saga-order-dlt-${HOSTNAME:local}-
