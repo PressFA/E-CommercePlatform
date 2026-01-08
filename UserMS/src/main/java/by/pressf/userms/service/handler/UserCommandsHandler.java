@@ -2,7 +2,9 @@ package by.pressf.userms.service.handler;
 
 import by.pressf.core.dto.commands.CancelUserBalanceDebitCommand;
 import by.pressf.core.dto.commands.DebitUserBalanceCommand;
+import by.pressf.core.dto.events.UserBalanceDebitCancelFailedEvent;
 import by.pressf.core.dto.events.UserBalanceDebitCanceledEvent;
+import by.pressf.core.dto.events.UserBalanceDebitFailedEvent;
 import by.pressf.core.dto.events.UserBalanceDebitedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
@@ -40,7 +42,7 @@ public class UserCommandsHandler {
     private final EventRepository eventRepository;
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handleCommand(@Payload DebitUserBalanceCommand command,
                               @Header("messageId") String messageId) {
         try {
@@ -78,15 +80,23 @@ public class UserCommandsHandler {
             log.info("The DebitUserBalanceCommand message with messageId={} has been processed", messageId);
         } catch (OptimisticLockingFailureException e) {
             log.error(e.getMessage());
-            throw new RetryableException(e);
+
+            UserBalanceDebitFailedEvent failedEvent = new UserBalanceDebitFailedEvent(command.orderId());
+
+            throw new RetryableException(e, env.getRequiredProperty("user.events.topic.name"),
+                    command.orderId(), failedEvent);
         } catch (UserNotFoundException | InsufficientBalanceException | DataAccessException e) {
             log.error(e.getMessage());
-            throw new NotRetryableException(e);
+
+            UserBalanceDebitFailedEvent failedEvent = new UserBalanceDebitFailedEvent(command.orderId());
+
+            throw new NotRetryableException(e, env.getRequiredProperty("user.events.topic.name"),
+                    command.orderId(), failedEvent);
         }
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handleCommand(@Payload CancelUserBalanceDebitCommand command,
                               @Header("messageId") String messageId) {
         try {
@@ -119,10 +129,18 @@ public class UserCommandsHandler {
             log.info("The CancelUserBalanceDebitCommand message with messageId={} has been processed", messageId);
         } catch (OptimisticLockingFailureException e) {
             log.error(e.getMessage());
-            throw new RetryableException(e);
+
+            UserBalanceDebitCancelFailedEvent failedEvent = new UserBalanceDebitCancelFailedEvent(command.orderId());
+
+            throw new RetryableException(e, env.getRequiredProperty("user.events.topic.name"),
+                    command.orderId(), failedEvent);
         } catch (UserNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
-            throw new NotRetryableException(e);
+
+            UserBalanceDebitCancelFailedEvent failedEvent = new UserBalanceDebitCancelFailedEvent(command.orderId());
+
+            throw new NotRetryableException(e, env.getRequiredProperty("user.events.topic.name"),
+                    command.orderId(), failedEvent);
         }
     }
 }

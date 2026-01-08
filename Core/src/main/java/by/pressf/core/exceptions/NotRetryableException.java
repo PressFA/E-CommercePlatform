@@ -1,7 +1,14 @@
 package by.pressf.core.exceptions;
 
-public class NotRetryableException extends RuntimeException {
-    public NotRetryableException(String message) { super(message); }
+import java.util.UUID;
 
-    public NotRetryableException(Throwable cause) { super(cause); }
+public class NotRetryableException extends EventException {
+
+    public NotRetryableException(Throwable cause) {
+        super(cause);
+    }
+
+    public NotRetryableException(Throwable cause, String topicName, UUID key, Object value) {
+        super(cause, topicName, key, value);
+    }
 }

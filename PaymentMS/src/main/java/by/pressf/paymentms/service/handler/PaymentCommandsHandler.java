@@ -2,7 +2,9 @@ package by.pressf.paymentms.service.handler;
 
 import by.pressf.core.dto.commands.RefundPaymentCommand;
 import by.pressf.core.dto.commands.ChargePaymentCommand;
+import by.pressf.core.dto.events.PaymentChargeFailedEvent;
 import by.pressf.core.dto.events.PaymentChargedEvent;
+import by.pressf.core.dto.events.PaymentRefundFailedEvent;
 import by.pressf.core.dto.events.PaymentRefundedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
@@ -37,7 +39,7 @@ public class PaymentCommandsHandler {
     private final EventRepository eventRepository;
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handleCommand(@Payload ChargePaymentCommand command,
                               @Header("messageId") String messageId) {
         try {
@@ -81,30 +83,41 @@ public class PaymentCommandsHandler {
             log.info("The ChargePaymentCommand message with messageId={} has been processed", messageId);
         } catch (PaymentFailedException e) {
             log.error(e.getMessage());
+
+            PaymentChargeFailedEvent failedEvent = new PaymentChargeFailedEvent(command.orderId());
+
             switch (e.getStatusCode()) {
                 // ошибка со стороны нашего сервиса
                 case 0 -> {
                     log.error("Error on the part of our service");
-                    throw new NotRetryableException(e);
+                    throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+                            command.orderId(), failedEvent);
                 }
                 // постоянная ошибка
-                case 400, 401, 402, 403, 404 -> throw new NotRetryableException(e);
+                case 400, 401, 402, 403, 404 -> throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+                        command.orderId(), failedEvent);
                 // временная ошибка
-                case 409, 424, 429, 500, 502, 503, 504 -> throw new RetryableException(e);
+                case 409, 424, 429, 500, 502, 503, 504 -> throw new RetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+                        command.orderId(), failedEvent);
                 // неизвестная ошибка
                 default -> {
                     log.error("Unknown error");
-                    throw new NotRetryableException(e);
+                    throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+                            command.orderId(), failedEvent);
                 }
             }
         } catch (DataAccessException e) {
             log.error(e.getMessage());
-            throw new NotRetryableException(e);
+
+            PaymentChargeFailedEvent failedEvent = new PaymentChargeFailedEvent(command.orderId());
+
+            throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+                    command.orderId(), failedEvent);
         }
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handleCommand(@Payload RefundPaymentCommand command,
                               @Header("messageId") String messageId) {
         try {
@@ -137,25 +150,36 @@ public class PaymentCommandsHandler {
             log.info("The RefundPaymentCommand message with messageId={} has been processed", messageId);
         } catch (PaymentFailedException e) {
             log.error(e.getMessage());
+
+            PaymentRefundFailedEvent failedEvent = new PaymentRefundFailedEvent(command.orderId());
+
             switch (e.getStatusCode()) {
                 // ошибка со стороны нашего сервиса
                 case 0 -> {
                     log.error("Error on the part of our service");
-                    throw new NotRetryableException(e);
+                    throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+                            command.orderId(), failedEvent);
                 }
                 // постоянная ошибка
-                case 400, 401, 402, 403, 404 -> throw new NotRetryableException(e);
+                case 400, 401, 402, 403, 404 -> throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+                        command.orderId(), failedEvent);
                 // временная ошибка
-                case 409, 424, 429, 500, 502, 503, 504 -> throw new RetryableException(e);
+                case 409, 424, 429, 500, 502, 503, 504 -> throw new RetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+                        command.orderId(), failedEvent);
                 // неизвестная ошибка
                 default -> {
                     log.error("Unknown error");
-                    throw new NotRetryableException(e);
+                    throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+                            command.orderId(), failedEvent);
                 }
             }
         } catch (DataAccessException e) {
             log.error(e.getMessage());
-            throw new NotRetryableException(e);
+
+            PaymentRefundFailedEvent failedEvent = new PaymentRefundFailedEvent(command.orderId());
+
+            throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+                    command.orderId(), failedEvent);
         }
     }
 }

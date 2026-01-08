@@ -11,7 +11,7 @@ import java.util.Map;
 public class StripeService {
     public void createPayment(BigDecimal amount) throws StripeException {
         Map<String, Object> params = Map.of(
-                "amount", amount.multiply(new BigDecimal("100")),
+                "amount", amount.multiply(new BigDecimal("100")).longValue(),
                 "currency", "usd",
                 "payment_method_types", java.util.List.of("card")
         );
@@ -21,7 +21,7 @@ public class StripeService {
 
     public void createRefundPayment(BigDecimal amount) throws StripeException {
         Map<String, Object> params = Map.of(
-                "amount", amount.multiply(new BigDecimal("100")),
+                "amount", amount.multiply(new BigDecimal("100")).longValue(),
                 "currency", "usd",
                 "payment_method_types", java.util.List.of("card")
         );

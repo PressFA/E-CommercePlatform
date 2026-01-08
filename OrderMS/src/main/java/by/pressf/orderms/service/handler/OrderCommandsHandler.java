@@ -3,6 +3,7 @@ package by.pressf.orderms.service.handler;
 import by.pressf.core.dto.commands.ConfirmOrderCommand;
 import by.pressf.core.dto.commands.RejectOrderCommand;
 import by.pressf.core.dto.events.OrderCompletedEvent;
+import by.pressf.core.dto.events.OrderCompletionFailedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.dao.entity.EventEntity;
 import by.pressf.orderms.dao.repository.EventRepository;
@@ -34,7 +35,7 @@ public class OrderCommandsHandler {
     private final EventRepository eventRepository;
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handleCommand(@Payload ConfirmOrderCommand command,
                               @Header("messageId") String messageId) {
         try {
@@ -67,12 +68,20 @@ public class OrderCommandsHandler {
             log.info("The ConfirmOrderCommand message with messageId={} has been processed", messageId);
         } catch (OrderNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
-            throw new NotRetryableException(e);
+
+            OrderCompletionFailedEvent failedEvent = new OrderCompletionFailedEvent(
+                    command.orderId(),
+                    command.userId(),
+                    command.amount()
+            );
+
+            throw new NotRetryableException(e, env.getRequiredProperty("order.events.topic.name"),
+                    command.orderId(), failedEvent);
         }
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handleCommand(@Payload RejectOrderCommand command,
                               @Header("messageId") String messageId) {
         try {

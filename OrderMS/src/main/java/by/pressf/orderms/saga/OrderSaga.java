@@ -29,7 +29,7 @@ import java.util.UUID;
         "${product.events.topic.name}",
         "${payment.events.topic.name}",
         "${user.events.topic.name}"
-}, containerFactory = "sagaKafkaListenerContainerFactory", groupId = "saga-order")
+}, groupId = "saga-order")
 public class OrderSaga {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -43,7 +43,7 @@ public class OrderSaga {
     */
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handle(@Payload OrderCreatedEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -87,7 +87,7 @@ public class OrderSaga {
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handle(@Payload ProductReservedEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -127,7 +127,7 @@ public class OrderSaga {
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handle(@Payload PaymentChargedEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -167,7 +167,7 @@ public class OrderSaga {
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handle(@Payload UserBalanceDebitedEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -207,7 +207,7 @@ public class OrderSaga {
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handle(@Payload OrderCompletedEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -239,7 +239,7 @@ public class OrderSaga {
     */
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handle(@Payload ProductReservationFailedEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -275,7 +275,7 @@ public class OrderSaga {
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handle(@Payload PaymentChargeFailedEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -310,7 +310,7 @@ public class OrderSaga {
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handle(@Payload UserBalanceDebitFailedEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -346,7 +346,7 @@ public class OrderSaga {
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handle(@Payload OrderCompletionFailedEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -392,7 +392,7 @@ public class OrderSaga {
     */
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
     public void handle(@Payload UserBalanceDebitCanceledEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -428,7 +428,46 @@ public class OrderSaga {
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
+    public void handle(@Payload UserBalanceDebitCancelFailedEvent event,
+                       @Header("messageId") String messageId) {
+        try {
+            log.info("The UserBalanceDebitCancelFailedEvent event from the user-events topic has been received");
+
+            EventEntity processedEvent = eventRepository.findByMessageId(messageId);
+            if (processedEvent != null) {
+                log.info("The UserBalanceDebitCancelFailedEvent message with messageId={} has already been processed", messageId);
+                return;
+            }
+
+            log.error("An error occurred while compensating for a transaction in the UserMS for an order with the ID {}",
+                    event.orderID());
+
+            RefundPaymentCommand command = new RefundPaymentCommand(event.orderID());
+
+            ProducerRecord<String, Object> record =
+                    new ProducerRecord<>(
+                            env.getRequiredProperty("payment.commands.topic.name"),
+                            command.orderId().toString(),
+                            command
+                    );
+            record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
+
+            kafkaTemplate.send(record);
+            log.info("The RefundPaymentCommand message was sent to the payment-commands topic");
+
+            eventRepository.save(EventEntity.builder()
+                    .messageId(messageId)
+                    .build());
+            log.info("The UserBalanceDebitCancelFailedEvent message with messageId={} has been processed", messageId);
+        } catch (DataAccessException e) {
+            log.error(e.getMessage());
+            throw new NotRetryableException(e);
+        }
+    }
+
+    @KafkaHandler
+    @Transactional("transactionManager")
     public void handle(@Payload PaymentRefundedEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -464,7 +503,46 @@ public class OrderSaga {
     }
 
     @KafkaHandler
-    @Transactional("jpaTransactionManager")
+    @Transactional("transactionManager")
+    public void handle(@Payload PaymentRefundFailedEvent event,
+                       @Header("messageId") String messageId) {
+        try {
+            log.info("The PaymentRefundFailedEvent event from the payment-events topic has been received");
+
+            EventEntity processedEvent = eventRepository.findByMessageId(messageId);
+            if (processedEvent != null) {
+                log.info("The PaymentRefundFailedEvent message with messageId={} has already been processed", messageId);
+                return;
+            }
+
+            log.error("An error occurred while compensating for a transaction in the PaymentMS for an order with the ID {}",
+                    event.orderId());
+
+            CancelProductReservationCommand command = new CancelProductReservationCommand(event.orderId());
+
+            ProducerRecord<String, Object> record =
+                    new ProducerRecord<>(
+                            env.getRequiredProperty("product.commands.topic.name"),
+                            command.orderId().toString(),
+                            command
+                    );
+            record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
+
+            kafkaTemplate.send(record);
+            log.info("The CancelProductReservationCommand message was sent to the product-commands topic");
+
+            eventRepository.save(EventEntity.builder()
+                    .messageId(messageId)
+                    .build());
+            log.info("The PaymentRefundFailedEvent message with messageId={} has been processed", messageId);
+        } catch (DataAccessException e) {
+            log.error(e.getMessage());
+            throw new NotRetryableException(e);
+        }
+    }
+
+    @KafkaHandler
+    @Transactional("transactionManager")
     public void handle(@Payload ProductReservationCanceledEvent event,
                        @Header("messageId") String messageId) {
         try {
@@ -475,6 +553,51 @@ public class OrderSaga {
                 log.info("The ProductReservationCanceledEvent message with messageId={} has already been processed", messageId);
                 return;
             }
+
+            orderHistoryService.rejectOrderHistory(event.orderId());
+            log.info("SagaOrderd couldn't create an order with the {} ID", event.orderId());
+
+            RejectOrderCommand command = new RejectOrderCommand(event.orderId());
+
+            ProducerRecord<String, Object> record =
+                    new ProducerRecord<>(
+                            env.getRequiredProperty("order.commands.topic.name"),
+                            command.orderId().toString(),
+                            command
+                    );
+            record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
+
+            kafkaTemplate.send(record);
+            log.info("The RejectOrderCommand message was sent to the order-commands topic");
+
+            eventRepository.save(EventEntity.builder()
+                    .messageId(messageId)
+                    .build());
+            log.info("The ProductReservationCanceledEvent message with messageId={} has been processed", messageId);
+        } catch (DataAccessException e) {
+            log.error(e.getMessage());
+            throw new NotRetryableException(e);
+        }
+    }
+
+    @KafkaHandler
+    @Transactional("transactionManager")
+    public void handle(@Payload ProductReservationCancelFailedEvent event,
+                       @Header("messageId") String messageId) {
+        try {
+            log.info("The ProductReservationCanceledEvent event from the product-events topic has been received");
+
+            EventEntity processedEvent = eventRepository.findByMessageId(messageId);
+            if (processedEvent != null) {
+                log.info("The ProductReservationCanceledEvent message with messageId={} has already been processed", messageId);
+                return;
+            }
+
+            log.error("An error occurred while compensating for a transaction in the ProductMS for an order with the ID {}",
+                    event.orderId());
+
+            orderHistoryService.rejectOrderHistory(event.orderId());
+            log.info("SagaOrderd couldn't create an order with the {} ID", event.orderId());
 
             RejectOrderCommand command = new RejectOrderCommand(event.orderId());
 

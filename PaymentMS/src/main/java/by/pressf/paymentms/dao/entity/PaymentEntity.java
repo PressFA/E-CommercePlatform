@@ -27,5 +27,6 @@ public class PaymentEntity {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private PaymentType type;
 }

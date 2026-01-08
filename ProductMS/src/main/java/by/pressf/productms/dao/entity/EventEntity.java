@@ -9,6 +9,5 @@ import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
 @NoArgsConstructor
-@AllArgsConstructor
 @Entity @Table(name = "processed_messages")
 public class EventEntity extends BaseEventEntity { }

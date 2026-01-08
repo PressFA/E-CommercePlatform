@@ -31,4 +31,13 @@ public class OrderHistoryService {
 
         orderHistoryRepository.save(entity);
     }
+
+    public void rejectOrderHistory(UUID orderId) {
+        OrderHistoryEntity entity = orderHistoryRepository.findByOrderId(orderId);
+
+        entity.setStatus(OrderStatus.REJECTED);
+        entity.setUpdatedAt(LocalDateTime.now());
+
+        orderHistoryRepository.save(entity);
+    }
 }

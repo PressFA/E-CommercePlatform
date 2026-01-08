@@ -2,13 +2,11 @@ package by.pressf.paymentms.config;
 
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -63,18 +61,8 @@ public class KafkaProducerConfig {
         return new KafkaTransactionManager<>(producerFactory);
     }
 
-    @Bean
+    @Bean("transactionManager")
     JpaTransactionManager jpaTransactionManager(EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);
-    }
-
-    @Bean
-    NewTopic createPaymentEventsTopic() {
-        return TopicBuilder.name(env.getRequiredProperty("payment.events.topic.name"))
-                .partitions(Integer.parseInt(env.getRequiredProperty("payment.events.topic.partitions")))
-                .replicas(Integer.parseInt(env.getRequiredProperty("payment.events.topic.replicas")))
-                .configs(Map.of("min.insync.replicas",
-                        env.getRequiredProperty("payment.events.topic.min.insync.replicas")))
-                .build();
     }
 }

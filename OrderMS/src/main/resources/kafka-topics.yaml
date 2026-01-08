@@ -15,10 +15,23 @@ order:
       min:
         insync:
           replicas: 2
+  dlt:
+    name: order-ms-dlt
+    partitions: 1
+    replicas: 1
+    min:
+      insync:
+        replicas: 1
+
 product:
   events:
     topic:
       name: product-events
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
   commands:
     topic:
       name: product-commands
@@ -27,10 +40,23 @@ product:
       min:
         insync:
           replicas: 2
+  dlt:
+    name: product-ms-dlt
+    partitions: 1
+    replicas: 1
+    min:
+      insync:
+        replicas: 1
+
 payment:
   events:
     topic:
       name: payment-events
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
   commands:
     topic:
       name: payment-commands
@@ -39,10 +65,23 @@ payment:
       min:
         insync:
           replicas: 2
+  dlt:
+    name: payment-ms-dlt
+    partitions: 1
+    replicas: 1
+    min:
+      insync:
+        replicas: 1
+
 user:
   events:
     topic:
       name: user-events
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
   commands:
     topic:
       name: user-commands
@@ -51,7 +90,10 @@ user:
       min:
         insync:
           replicas: 2
-saga:
   dlt:
-    name: saga-order-dlt
-    transaction-id-prefix: saga-order-dlt-${HOSTNAME:local}-
+    name: user-ms-dlt
+    partitions: 1
+    replicas: 1
+    min:
+      insync:
+        replicas: 1

@@ -4,7 +4,7 @@ spring:
       bootstrap-servers: localhost:9092,localhost:9094,localhost:9096
       isolation-level: read_committed
       properties:
-        spring.json.trusted.packages: by.pressf.core
+        spring.json.trusted.packages: by.pressf.core.*
 
 user:
   commands:
@@ -14,4 +14,3 @@ dead:
   letter:
     topic:
       name: user-ms-dlt
-      transaction-id-prefix: user-ms-dlt-${HOSTNAME:local}-

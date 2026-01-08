@@ -9,3 +9,11 @@ spring:
       - classpath:application-db.yaml # Database (H2)
       - classpath:application-kafka-consumer.yaml # Kafka Consumer
       - classpath:application-kafka-producer.yaml # Kafka Producer
+      - classpath:kafka-topics.yaml # Topic's
+
+logging:
+  level:
+    org.springframework.kafka.transaction.KafkaAwareTransactionManager: DEBUG
+    org.springframework.transaction: DEBUG
+    org.springframework.orm.jpa.JpaTransactionManager: DEBUG
+    org.apache.kafka.clients.producer.internals.TransactionManager: DEBUG

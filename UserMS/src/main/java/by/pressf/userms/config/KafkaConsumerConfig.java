@@ -1,10 +1,13 @@
 package by.pressf.userms.config;
 
+import by.pressf.core.exceptions.EventException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -23,6 +26,7 @@ import org.springframework.util.backoff.FixedBackOff;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class KafkaConsumerConfig {
@@ -35,7 +39,7 @@ public class KafkaConsumerConfig {
                 env.getRequiredProperty("spring.kafka.consumer.bootstrap-servers"));
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
-        config.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, JacksonJsonDeserializer.class);
+        config.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, JacksonJsonDeserializer.class);
         config.put(JacksonJsonDeserializer.TRUSTED_PACKAGES,
                 env.getRequiredProperty("spring.kafka.consumer.properties.spring.json.trusted.packages"));
         config.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG,
@@ -44,18 +48,14 @@ public class KafkaConsumerConfig {
         return new DefaultKafkaConsumerFactory<>(config);
     }
 
-    @Bean
+    @Bean // Бин-настройщик
     ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory(
             ConsumerFactory<String, Object> consumerFactory,
-            KafkaTemplate<String, Object> kafkaTemplateDlt) {
-        ConcurrentKafkaListenerContainerFactory<String, Object> factory = new ConcurrentKafkaListenerContainerFactory<>();
+            DeadLetterPublishingRecoverer recoverer
+    ) {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
+                new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
-
-        DeadLetterPublishingRecoverer recoverer =
-                new DeadLetterPublishingRecoverer(
-                        kafkaTemplateDlt,
-                        (record, ex) -> new TopicPartition(env.getRequiredProperty("dead.letter.topic.name"), record.partition())
-                );
 
         DefaultErrorHandler errorHandler =
                 new DefaultErrorHandler(
@@ -70,36 +70,65 @@ public class KafkaConsumerConfig {
         return factory;
     }
 
+    /*
+    Вторым параметром возвращаемого значения, передаётся лямбда-выражение, которое описывает
+    логику обработки сообщения перед публикацией в dead letter topic (DLT)
+    */
     @Bean
+    DeadLetterPublishingRecoverer recoverer(KafkaTemplate<String, Object> kafkaTemplateDlt) {
+        return new DeadLetterPublishingRecoverer(
+                kafkaTemplateDlt,
+                (consumerRecord, ex) -> {
+                    Throwable cause = ex.getCause();
+
+                    if (cause instanceof EventException e && e.getValue() != null) {
+                        ProducerRecord<String, Object> record =
+                                new ProducerRecord<>(
+                                        e.getTopicName(),
+                                        e.getKey(),
+                                        e.getValue()
+                                );
+                        record.headers().add("messageId", e.getMessageId().getBytes());
+
+                        kafkaTemplateDlt.send(record)
+                                .whenComplete((result, exeption) -> {
+                                    if (exeption != null) {
+                                        log.error("The message {} was not delivered to {} topic",
+                                                e.getValue().getClass().getSimpleName(),
+                                                e.getTopicName());
+                                    } else {
+                                        log.info("Message {} successfully delivered to {} topic",
+                                                e.getValue().getClass().getSimpleName(),
+                                                e.getTopicName());
+                                    }
+                                });
+                    }
+
+                    log.info("The message {} has been sent to {} topic",
+                            consumerRecord.value().getClass().getSimpleName(),
+                            env.getRequiredProperty("user.dlt.name"));
+                    return new TopicPartition(
+                            env.getRequiredProperty("user.dlt.name"),
+                            consumerRecord.partition()
+                    );
+                }
+        );
+    }
+
+    @Bean // Бин-kafkaTemplate для отправки сообщений в dead letter topic (DLT)
     KafkaTemplate<String, Object> kafkaTemplateDlt(ProducerFactory<String, Object> producerFactoryDlt) {
         return new KafkaTemplate<>(producerFactoryDlt);
     }
 
-    @Bean
+    @Bean // Бин-продюсер, который принимает мёртвые сообщения
     ProducerFactory<String, Object> producerFactoryDlt() {
         Map<String, Object> config = new HashMap<>();
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                env.getRequiredProperty("spring.kafka.consumer.bootstrap-servers"));
-        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
+                env.getRequiredProperty("spring.kafka.producer.bootstrap-servers"));
         config.put(ProducerConfig.ACKS_CONFIG,
                 env.getRequiredProperty("spring.kafka.producer.acks"));
-        config.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,
-                env.getRequiredProperty("spring.kafka.producer.properties.max.in.flight.requests.per.connection"));
-        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,
-                env.getRequiredProperty("spring.kafka.producer.properties.enable.idempotence"));
-        config.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG,
-                env.getRequiredProperty("dead.letter.topic.transaction-id-prefix"));
-        config.put(ProducerConfig.RETRIES_CONFIG,
-                env.getRequiredProperty("spring.kafka.producer.retries"));
-        config.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG,
-                env.getRequiredProperty("spring.kafka.producer.properties.retry.backoff.ms"));
-        config.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG,
-                env.getRequiredProperty("spring.kafka.producer.properties.delivery.timeout.ms"));
-        config.put(ProducerConfig.LINGER_MS_CONFIG,
-                env.getRequiredProperty("spring.kafka.producer.properties.linger.ms"));
-        config.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG,
-                env.getRequiredProperty("spring.kafka.producer.properties.request.timeout.ms"));
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
 
         return new DefaultKafkaProducerFactory<>(config);
     }
