@@ -31,6 +31,14 @@
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
+        <option name="externalProjectPath" value="$PROJECT_DIR$/ShoppingCartMS" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/ShoppingCartMS" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/UserMS" />
         <option name="gradleJvm" value="21" />
         <option name="modules">

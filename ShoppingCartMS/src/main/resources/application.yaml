@@ -1,0 +1,9 @@
+server:
+  port: 50005
+
+spring:
+  application:
+    name: ShoppingCartMS
+  config:
+    import:
+      - classpath:application-db.yaml # Database (H2)

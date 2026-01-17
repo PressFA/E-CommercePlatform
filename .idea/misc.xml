@@ -5,6 +5,7 @@
     <file type="web" url="file://$PROJECT_DIR$/OrderMS" />
     <file type="web" url="file://$PROJECT_DIR$/PaymentMS" />
     <file type="web" url="file://$PROJECT_DIR$/ProductMS" />
+    <file type="web" url="file://$PROJECT_DIR$/ShoppingCartMS" />
     <file type="web" url="file://$PROJECT_DIR$/UserMS" />
   </component>
   <component name="MavenProjectsManager">
