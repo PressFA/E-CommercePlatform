@@ -40,13 +40,6 @@ product:
       min:
         insync:
           replicas: 2
-  dlt:
-    name: product-ms-dlt
-    partitions: 1
-    replicas: 1
-    min:
-      insync:
-        replicas: 1
 
 payment:
   events:
@@ -65,13 +58,6 @@ payment:
       min:
         insync:
           replicas: 2
-  dlt:
-    name: payment-ms-dlt
-    partitions: 1
-    replicas: 1
-    min:
-      insync:
-        replicas: 1
 
 user:
   events:
@@ -90,10 +76,13 @@ user:
       min:
         insync:
           replicas: 2
-  dlt:
-    name: user-ms-dlt
-    partitions: 1
-    replicas: 1
-    min:
-      insync:
-        replicas: 1
+
+shopping-cart:
+  events:
+    topic:
+      name: cart-checkout-initiated
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2

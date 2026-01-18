@@ -23,39 +23,64 @@ public class ShoppingCartRestController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<?> getShoppingCartsByUserId(@PathVariable UUID userId) {
+        log.info("Received request to get shopping carts for userId: {}", userId);
         List<CartInfo> shoppingCarts = shoppingCartService.getShoppingCartsByUser(userId);
 
+        log.info("Successfully retrieved {} items for userId: {}", shoppingCarts.size(), userId);
         return ResponseEntity.status(HttpStatus.OK).body(shoppingCarts);
     }
 
     @PostMapping
     public ResponseEntity<?> addToCart(@RequestBody CreateCartRequest cartRequest) {
+        log.info("Received request to add item to cart for userId: {}, productId: {}",
+                cartRequest.userId(), cartRequest.productId());
         CartInfo cartInfo = shoppingCartService.createCart(cartRequest);
 
+        log.info("Successfully created cart item with id: {}", cartInfo.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(cartInfo);
+    }
+
+    @PostMapping("/buy/{id}")
+    public ResponseEntity<?> placeOrder(@PathVariable UUID id) {
+        try {
+            log.info("Received request to place order from shopping cart item id: {}", id);
+            shoppingCartService.createOrderFromShoppingCart(id);
+
+            log.info("Successfully processed checkout for cart item id: {}", id);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        } catch (AppError e) {
+            log.error(e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(e);
+        }
     }
 
     @PatchMapping
     public ResponseEntity<?> updateQuantityItemCart(@RequestBody QuantityChangeCart changeCart) {
         try {
+            log.info("Received request to update quantity for cart item id: {}. Change: {}",
+                    changeCart.id(), changeCart.quantity());
             CartInfo cartInfo = shoppingCartService.updateQuantity(changeCart);
 
+            log.info("Successfully updated quantity for cart item id: {}. New quantity: {}",
+                    cartInfo.id(), cartInfo.quantity());
             return ResponseEntity.status(HttpStatus.OK).body(cartInfo);
         } catch (AppError e) {
             log.error(e.getMessage());
-            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(e);
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> removeItem(@PathVariable UUID id) {
         try {
+            log.info("Received request to remove cart item with id: {}", id);
             shoppingCartService.removeItemFromCart(id);
 
+            log.info("Successfully removed cart item with id: {}", id);
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         } catch (AppError e) {
             log.error(e.getMessage());
-            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+            return ResponseEntity.status(e.getStatus()).body(e);
         }
     }
 }

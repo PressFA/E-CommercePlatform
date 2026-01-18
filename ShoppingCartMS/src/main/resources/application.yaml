@@ -7,3 +7,5 @@ spring:
   config:
     import:
       - classpath:application-db.yaml # Database (H2)
+      - classpath:application-kafka-producer.yaml # Kafka Producer
+      - classpath:kafka-topics.yaml # Topic's
