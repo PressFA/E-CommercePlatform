@@ -13,7 +13,7 @@
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
         </processorPath>
-        <module name="ShoppingCartMS.main" />
+        <module name="EmailNotificationMS.main" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -23,6 +23,9 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="Core" options="" />
+      <module name="EmailNotificationMS" options="-parameters" />
+      <module name="EmailNotificationMS.main" options="-parameters" />
+      <module name="EmailNotificationMS.test" options="-parameters" />
       <module name="OrderMS" options="-parameters" />
       <module name="OrderMS.main" options="-parameters" />
       <module name="OrderMS.test" options="-parameters" />

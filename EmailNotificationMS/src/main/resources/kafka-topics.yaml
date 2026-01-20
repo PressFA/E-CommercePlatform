@@ -1,0 +1,16 @@
+email-notification:
+  events:
+    topic:
+      name: send-notification-event
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
+  dlt:
+    name: email-notification-ms-dlt
+    partitions: 1
+    replicas: 1
+    min:
+      insync:
+        replicas: 1

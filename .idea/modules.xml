@@ -3,6 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/E-CommercePlatform.iml" filepath="$PROJECT_DIR$/E-CommercePlatform.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/EmailNotificationMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/EmailNotificationMS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/OrderMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/OrderMS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ShoppingCartMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ShoppingCartMS.main.iml" />
     </modules>
   </component>
 </project>

@@ -1,0 +1,12 @@
+server:
+  port: 50006
+
+spring:
+  application:
+    name: EmailNotificationMS
+  config:
+    import:
+      - classpath:application-db.yaml # Database (H2)
+      - classpath:application-kafka-consumer.yaml # Kafka Consumer
+      - classpath:kafka-topics.yaml # Topic's
+      - classpath:application-setting-mail.yaml # Sending emails
