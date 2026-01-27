@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>by.pressf</groupId>
-    <artifactId>Core</artifactId>
+    <artifactId>core</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
@@ -23,6 +23,19 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub pressfa Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/pressfa/e-commerceplatformlibrary</url>
+        </repository>
+        <snapshotRepository>
+            <id>github</id>
+            <name>GitHub pressfa Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/pressfa/e-commerceplatformlibrary</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>

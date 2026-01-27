@@ -12,13 +12,3 @@ spring:
         delivery.timeout.ms: 60000
         linger.ms: 0
         request.timeout.ms: 30000
-
-user:
-  events:
-    topic:
-      name: user-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2

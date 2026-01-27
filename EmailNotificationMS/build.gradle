@@ -15,7 +15,13 @@ java {
 }
 
 repositories {
-    mavenLocal()
+    maven {
+        url = uri("https://maven.pkg.github.com/pressfa/e-commerceplatformlibrary")
+        credentials {
+            username = "PressFA"
+            password = "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"
+        }
+    }
     mavenCentral()
 }
 
@@ -33,7 +39,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    implementation 'by.pressf:Core:0.0.1-SNAPSHOT'
+    implementation 'by.pressf:core:0.0.1-SNAPSHOT'
 }
 
 tasks.named('test') {

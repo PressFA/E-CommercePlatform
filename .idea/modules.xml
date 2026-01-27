@@ -5,7 +5,10 @@
       <module fileurl="file://$PROJECT_DIR$/E-CommercePlatform.iml" filepath="$PROJECT_DIR$/E-CommercePlatform.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/EmailNotificationMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/EmailNotificationMS.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/OrderMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/OrderMS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PaymentMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/PaymentMS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ProductMs.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ProductMs.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ShoppingCartMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ShoppingCartMS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/UserMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/UserMS.main.iml" />
     </modules>
   </component>
 </project>
