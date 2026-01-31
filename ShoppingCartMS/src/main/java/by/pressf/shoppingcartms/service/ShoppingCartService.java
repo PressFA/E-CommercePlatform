@@ -1,6 +1,6 @@
 package by.pressf.shoppingcartms.service;
 
-import by.pressf.core.dto.events.CreateOrderShoppingCart;
+import by.pressf.core.dto.events.cart.CreateOrderShoppingCart;
 import by.pressf.core.exceptions.AppError;
 import by.pressf.shoppingcartms.dao.entity.CartEntity;
 import by.pressf.shoppingcartms.dao.repository.ShoppingCartRepository;
@@ -33,6 +33,12 @@ public class ShoppingCartService {
 
     @Transactional("transactionManager")
     public CartInfo createCart(CreateCartRequest cartRequest) {
+        CartEntity checkCart = shoppingCartRepository.findByUserIdAndProductId(cartRequest.userId(), cartRequest.productId());
+
+        if (checkCart != null) {
+            throw new AppError(400, "This product is already in the shopping cart. You can't add the same product twice.");
+        }
+
         CartEntity cart = CartEntity.builder()
                 .userId(cartRequest.userId())
                 .productId(cartRequest.productId())

@@ -11,4 +11,6 @@ import java.util.UUID;
 @Repository
 public interface ShoppingCartRepository extends JpaRepository<CartEntity, UUID> {
     List<CartInfo> findAllByUserId(UUID userId);
+
+    CartEntity findByUserIdAndProductId(UUID userId, UUID productId);
 }
