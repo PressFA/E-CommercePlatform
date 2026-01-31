@@ -5,6 +5,7 @@ import by.pressf.shoppingcartms.dto.CartInfo;
 import by.pressf.shoppingcartms.dto.CreateCartRequest;
 import by.pressf.shoppingcartms.dto.QuantityChangeCart;
 import by.pressf.shoppingcartms.service.ShoppingCartService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,7 +32,7 @@ public class ShoppingCartRestController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addToCart(@RequestBody CreateCartRequest cartRequest) {
+    public ResponseEntity<?> addToCart(@RequestBody @Valid CreateCartRequest cartRequest) {
         log.info("Received request to add item to cart for userId: {}, productId: {}",
                 cartRequest.userId(), cartRequest.productId());
         CartInfo cartInfo = shoppingCartService.createCart(cartRequest);
@@ -42,45 +43,30 @@ public class ShoppingCartRestController {
 
     @PostMapping("/buy/{id}")
     public ResponseEntity<?> placeOrder(@PathVariable UUID id) {
-        try {
-            log.info("Received request to place order from shopping cart item id: {}", id);
-            shoppingCartService.createOrderFromShoppingCart(id);
+        log.info("Received request to place order from shopping cart item id: {}", id);
+        shoppingCartService.createOrderFromShoppingCart(id);
 
-            log.info("Successfully processed checkout for cart item id: {}", id);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        } catch (AppError e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(e.getStatus()).body(e);
-        }
+        log.info("Successfully processed checkout for cart item id: {}", id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @PatchMapping
-    public ResponseEntity<?> updateQuantityItemCart(@RequestBody QuantityChangeCart changeCart) {
-        try {
-            log.info("Received request to update quantity for cart item id: {}. Change: {}",
-                    changeCart.id(), changeCart.quantity());
-            CartInfo cartInfo = shoppingCartService.updateQuantity(changeCart);
+    public ResponseEntity<?> updateQuantityItemCart(@RequestBody @Valid QuantityChangeCart changeCart) {
+        log.info("Received request to update quantity for cart item id: {}. Change: {}",
+                changeCart.id(), changeCart.quantity());
+        CartInfo cartInfo = shoppingCartService.updateQuantity(changeCart);
 
-            log.info("Successfully updated quantity for cart item id: {}. New quantity: {}",
-                    cartInfo.id(), cartInfo.quantity());
-            return ResponseEntity.status(HttpStatus.OK).body(cartInfo);
-        } catch (AppError e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(e.getStatus()).body(e);
-        }
+        log.info("Successfully updated quantity for cart item id: {}. New quantity: {}",
+                cartInfo.id(), cartInfo.quantity());
+        return ResponseEntity.status(HttpStatus.OK).body(cartInfo);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> removeItem(@PathVariable UUID id) {
-        try {
-            log.info("Received request to remove cart item with id: {}", id);
-            shoppingCartService.removeItemFromCart(id);
+        log.info("Received request to remove cart item with id: {}", id);
+        shoppingCartService.removeItemFromCart(id);
 
-            log.info("Successfully removed cart item with id: {}", id);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        } catch (AppError e) {
-            log.error(e.getMessage());
-            return ResponseEntity.status(e.getStatus()).body(e);
-        }
+        log.info("Successfully removed cart item with id: {}", id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
