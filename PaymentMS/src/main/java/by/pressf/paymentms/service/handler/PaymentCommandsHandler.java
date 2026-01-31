@@ -1,11 +1,11 @@
 package by.pressf.paymentms.service.handler;
 
-import by.pressf.core.dto.commands.RefundPaymentCommand;
-import by.pressf.core.dto.commands.ChargePaymentCommand;
-import by.pressf.core.dto.events.PaymentChargeFailedEvent;
-import by.pressf.core.dto.events.PaymentChargedEvent;
-import by.pressf.core.dto.events.PaymentRefundFailedEvent;
-import by.pressf.core.dto.events.PaymentRefundedEvent;
+import by.pressf.core.dto.commands.payment.RefundPaymentCommand;
+import by.pressf.core.dto.commands.payment.ChargePaymentCommand;
+import by.pressf.core.dto.events.payment.PaymentChargeFailedEvent;
+import by.pressf.core.dto.events.payment.PaymentChargedEvent;
+import by.pressf.core.dto.events.payment.PaymentRefundFailedEvent;
+import by.pressf.core.dto.events.payment.PaymentRefundedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import by.pressf.paymentms.dao.entity.EventEntity;

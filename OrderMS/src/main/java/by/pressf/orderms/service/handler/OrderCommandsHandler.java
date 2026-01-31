@@ -1,10 +1,11 @@
 package by.pressf.orderms.service.handler;
 
-import by.pressf.core.dto.commands.ConfirmOrderCommand;
-import by.pressf.core.dto.commands.RejectOrderCommand;
-import by.pressf.core.dto.events.EmailMessage;
-import by.pressf.core.dto.events.OrderCompletedEvent;
-import by.pressf.core.dto.events.OrderCompletionFailedEvent;
+import by.pressf.core.dto.commands.order.ConfirmOrderCommand;
+import by.pressf.core.dto.commands.order.RejectOrderCommand;
+import by.pressf.core.dto.events.order.OrderCompletedEvent;
+import by.pressf.core.dto.events.order.OrderCompletionFailedEvent;
+import by.pressf.core.dto.events.order.OrderRejectedEvent;
+import by.pressf.core.dto.events.order.OrderRejectionFailedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.dao.entity.EventEntity;
 import by.pressf.orderms.dao.repository.EventRepository;
@@ -52,33 +53,16 @@ public class OrderCommandsHandler {
             log.info("The order with the ID {} has been approved", command.orderId());
 
             OrderCompletedEvent event = new OrderCompletedEvent(command.orderId());
-            ProducerRecord<String, Object> record1 =
+            ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
                             env.getRequiredProperty("order.events.topic.name"),
                             command.orderId().toString(),
                             event
                     );
-            record1.headers().add("messageId", UUID.randomUUID().toString().getBytes());
+            record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
-            kafkaTemplate.send(record1);
+            kafkaTemplate.send(record);
             log.info("The OrderCompletedEvent message was sent to the order-events topic.");
-
-            EmailMessage message = new EmailMessage(
-                    "artemsurmenok@gmail.com",
-                    "TEST subject: APPROVE",
-                    "TEST body: APPROVE"
-            );
-
-            ProducerRecord<String, Object> record2 =
-                    new ProducerRecord<>(
-                            env.getRequiredProperty("email-notification.events.topic.name"),
-                            command.orderId().toString(),
-                            message
-                    );
-            record2.headers().add("messageId", UUID.randomUUID().toString().getBytes());
-
-            kafkaTemplate.send(record2);
-            log.info("The EmailMessage message was sent to the send-notification-event topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
@@ -114,22 +98,17 @@ public class OrderCommandsHandler {
             orderService.rejectOrder(command.orderId());
             log.info("The order with ID {} has been rejected", command.orderId());
 
-            EmailMessage message = new EmailMessage(
-                    "artemsurmenok@gmail.com",
-                    "TEST subject: REJECT",
-                    "TEST body: REJECT"
-            );
-
+            OrderRejectedEvent event = new OrderRejectedEvent(command.orderId());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("email-notification.events.topic.name"),
+                            env.getRequiredProperty("order.events.topic.name"),
                             command.orderId().toString(),
-                            message
+                            event
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The EmailMessage message was sent to the send-notification-event topic.");
+            log.info("The OrderRejectedEvent message was sent to the order-events topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
@@ -137,7 +116,11 @@ public class OrderCommandsHandler {
             log.info("The RejectOrderCommand message with messageId={} has been processed", messageId);
         } catch (OrderNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
-            throw new NotRetryableException(e);
+
+            OrderRejectionFailedEvent failedEvent = new OrderRejectionFailedEvent(command.orderId());
+
+            throw new NotRetryableException(e, env.getRequiredProperty("order.events.topic.name"),
+                    command.orderId(), failedEvent);
         }
     }
 }

@@ -1,7 +1,7 @@
 package by.pressf.orderms.service;
 
 import by.pressf.orderms.dao.entity.OrderHistoryEntity;
-import by.pressf.orderms.dao.entity.status.OrderStatus;
+import by.pressf.orderms.dao.entity.status.OrderHistoryStatus;
 import by.pressf.orderms.dao.repository.OrderHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,29 +14,24 @@ import java.util.UUID;
 public class OrderHistoryService {
     private final OrderHistoryRepository orderHistoryRepository;
 
-    public void createOrderHistory(UUID orderId) {
+    public void createSuccessLog(UUID orderId, String reason) {
         OrderHistoryEntity entity = OrderHistoryEntity.builder()
                 .orderId(orderId)
+                .status(OrderHistoryStatus.SUCCESS)
                 .createdAt(LocalDateTime.now())
-                .status(OrderStatus.CREATED)
+                .reason(reason)
                 .build();
-        orderHistoryRepository.save(entity);
-    }
-
-    public void approveOrderHistory(UUID orderId) {
-        OrderHistoryEntity entity = orderHistoryRepository.findByOrderId(orderId);
-
-        entity.setStatus(OrderStatus.APPROVED);
-        entity.setUpdatedAt(LocalDateTime.now());
 
         orderHistoryRepository.save(entity);
     }
 
-    public void rejectOrderHistory(UUID orderId) {
-        OrderHistoryEntity entity = orderHistoryRepository.findByOrderId(orderId);
-
-        entity.setStatus(OrderStatus.REJECTED);
-        entity.setUpdatedAt(LocalDateTime.now());
+    public void createFailLog(UUID orderId, String reason) {
+        OrderHistoryEntity entity = OrderHistoryEntity.builder()
+                .orderId(orderId)
+                .status(OrderHistoryStatus.FAIL)
+                .createdAt(LocalDateTime.now())
+                .reason(reason)
+                .build();
 
         orderHistoryRepository.save(entity);
     }

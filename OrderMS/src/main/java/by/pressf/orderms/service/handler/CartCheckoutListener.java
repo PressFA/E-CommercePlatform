@@ -1,6 +1,6 @@
 package by.pressf.orderms.service.handler;
 
-import by.pressf.core.dto.events.CreateOrderShoppingCart;
+import by.pressf.core.dto.events.cart.CreateOrderShoppingCart;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.dao.entity.EventEntity;
 import by.pressf.orderms.dao.repository.EventRepository;

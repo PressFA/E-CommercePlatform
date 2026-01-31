@@ -1,6 +1,6 @@
 package by.pressf.orderms.service;
 
-import by.pressf.core.dto.events.OrderCreatedEvent;
+import by.pressf.core.dto.events.order.OrderCreatedEvent;
 import by.pressf.orderms.dao.entity.OrderEntity;
 import by.pressf.orderms.dao.entity.status.OrderStatus;
 import by.pressf.orderms.dao.repository.OrderRepository;

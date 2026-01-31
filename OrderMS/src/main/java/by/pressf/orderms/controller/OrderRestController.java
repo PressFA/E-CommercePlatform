@@ -3,6 +3,7 @@ package by.pressf.orderms.controller;
 import by.pressf.orderms.dto.CreateOrderRequest;
 import by.pressf.orderms.dto.OrderCreationData;
 import by.pressf.orderms.service.OrderService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class OrderRestController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest req) {
+    public ResponseEntity<?> createOrder(@RequestBody @Valid CreateOrderRequest req) {
         log.info("I received a request from a user with the ID {} to create an order for an item with the ID {}, quantity {}",
                 req.userId(), req.productId(), req.quantity());
 

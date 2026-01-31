@@ -1,6 +1,6 @@
 package by.pressf.emailnotificationms.service.handler;
 
-import by.pressf.core.dto.events.EmailMessage;
+import by.pressf.core.dto.events.emailnotification.EmailMessage;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.emailnotificationms.dao.entity.EventEntity;
 import by.pressf.emailnotificationms.dao.repository.EventRepository;

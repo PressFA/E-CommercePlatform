@@ -1,6 +1,6 @@
 package by.pressf.orderms.dao.entity;
 
-import by.pressf.orderms.dao.entity.status.OrderStatus;
+import by.pressf.orderms.dao.entity.status.OrderHistoryStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,15 +15,15 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity @Table(name = "orders_history")
 public class OrderHistoryEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
     @Column(name = "order_id")
     private UUID orderId;
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private OrderHistoryStatus status;
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+    @Column(columnDefinition = "TEXT")
+    private String reason;
 }

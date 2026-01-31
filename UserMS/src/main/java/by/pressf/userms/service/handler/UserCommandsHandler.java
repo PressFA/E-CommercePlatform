@@ -1,11 +1,11 @@
 package by.pressf.userms.service.handler;
 
-import by.pressf.core.dto.commands.CancelUserBalanceDebitCommand;
-import by.pressf.core.dto.commands.DebitUserBalanceCommand;
-import by.pressf.core.dto.events.UserBalanceDebitCancelFailedEvent;
-import by.pressf.core.dto.events.UserBalanceDebitCanceledEvent;
-import by.pressf.core.dto.events.UserBalanceDebitFailedEvent;
-import by.pressf.core.dto.events.UserBalanceDebitedEvent;
+import by.pressf.core.dto.commands.user.CancelUserBalanceDebitCommand;
+import by.pressf.core.dto.commands.user.DebitUserBalanceCommand;
+import by.pressf.core.dto.events.user.UserBalanceDebitCancelFailedEvent;
+import by.pressf.core.dto.events.user.UserBalanceDebitCanceledEvent;
+import by.pressf.core.dto.events.user.UserBalanceDebitFailedEvent;
+import by.pressf.core.dto.events.user.UserBalanceDebitedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import by.pressf.userms.dao.entity.EventEntity;
