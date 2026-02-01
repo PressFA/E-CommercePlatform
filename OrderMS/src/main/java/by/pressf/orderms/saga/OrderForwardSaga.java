@@ -1,10 +1,11 @@
 package by.pressf.orderms.saga;
 
+import by.pressf.core.dto.commands.emailnotification.SendEmailOrderCommand;
 import by.pressf.core.dto.commands.order.ConfirmOrderCommand;
 import by.pressf.core.dto.commands.payment.ChargePaymentCommand;
 import by.pressf.core.dto.commands.product.ReserveProductCommand;
 import by.pressf.core.dto.commands.user.DebitUserBalanceCommand;
-import by.pressf.core.dto.events.emailnotification.EmailMessage;
+import by.pressf.core.dto.events.emailnotification.EmailOrderSentEvent;
 import by.pressf.core.dto.events.order.OrderCompletedEvent;
 import by.pressf.core.dto.events.order.OrderCreatedEvent;
 import by.pressf.core.dto.events.payment.PaymentChargedEvent;
@@ -36,7 +37,8 @@ import java.util.UUID;
         "${order.events.topic.name}",
         "${product.events.topic.name}",
         "${payment.events.topic.name}",
-        "${user.events.topic.name}"
+        "${user.events.topic.name}",
+        "${email-notification.events.topic.name}"
 }, groupId = "saga-order")
 public class OrderForwardSaga { // Здесь события, когда всё идёт идеально
     private final Environment env;
@@ -233,27 +235,57 @@ public class OrderForwardSaga { // Здесь события, когда всё 
             orderHistoryService.createSuccessLog(event.orderId(),
                     "OrderMS: The order status has been successfully changed to APPROVED");
 
-            EmailMessage message = new EmailMessage(
+            SendEmailOrderCommand message = new SendEmailOrderCommand(
                     "artemsurmenok@gmail.com",
                     "TEST subject: APPROVE",
-                    "TEST body: APPROVE"
+                    "TEST body: APPROVE",
+                    event.orderId()
             );
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("email-notification.events.topic.name"),
+                            env.getRequiredProperty("email-notification.commands.topic.name"),
                             event.orderId().toString(),
                             message
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The EmailMessage message was sent to the send-notification-event topic.");
+            log.info("The SendEmailOrderCommand message was sent to the email-notification-commands topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
             log.info("The OrderCompletedEvent message with messageId={} has been processed", messageId);
+        } catch (DataAccessException e) {
+            log.error(e.getMessage());
+            throw new NotRetryableException(e);
+        }
+    }
+
+    @KafkaHandler
+    @Transactional("transactionManager")
+    public void handle(@Payload EmailOrderSentEvent event,
+                       @Header("messageId") String messageId) {
+        try {
+            log.info("The EmailOrderSentEvent event from the email-notification-events topic has been received");
+
+            EventEntity processedEvent = eventRepository.findByMessageId(messageId);
+            if (processedEvent != null) {
+                log.info("The EmailOrderSentEvent message with messageId={} has already been processed", messageId);
+                return;
+            }
+
+            orderHistoryService.createSuccessLog(event.orderId(),
+                    "EmailNotificationMS: the email was sent successfully.");
+
+            orderHistoryService.createSuccessLog(event.orderId(),
+                    "OrderSaga: saga has completed its work");
+
+            eventRepository.save(EventEntity.builder()
+                    .messageId(messageId)
+                    .build());
+            log.info("The EmailOrderSentEvent message with messageId={} has been processed", messageId);
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);

@@ -25,6 +25,16 @@ public class KafkaTopicConfig {
     }
 
     @Bean
+    NewTopic createEmailNotificationCommandsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("email-notification.commands.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("email-notification.commands.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("email-notification.commands.topic.replicas")))
+                .configs(Map.of("min.insync.replicas",
+                        env.getRequiredProperty("email-notification.commands.topic.min.insync.replicas")))
+                .build();
+    }
+
+    @Bean
     NewTopic createEmailNotificationDeadLetterTopic() {
         return TopicBuilder.name(env.getRequiredProperty("email-notification.dlt.name"))
                 .partitions(Integer.parseInt(env.getRequiredProperty("email-notification.dlt.partitions")))

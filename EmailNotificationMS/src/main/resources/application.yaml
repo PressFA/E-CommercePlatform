@@ -8,5 +8,6 @@ spring:
     import:
       - classpath:application-db.yaml # Database (H2)
       - classpath:application-kafka-consumer.yaml # Kafka Consumer
+      - classpath:application-kafka-producer.yaml # Kafka Producer
       - classpath:kafka-topics.yaml # Topic's
       - classpath:application-setting-mail.yaml # Sending emails

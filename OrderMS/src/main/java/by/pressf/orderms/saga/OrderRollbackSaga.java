@@ -1,9 +1,9 @@
 package by.pressf.orderms.saga;
 
+import by.pressf.core.dto.commands.emailnotification.SendEmailOrderCommand;
 import by.pressf.core.dto.commands.order.RejectOrderCommand;
 import by.pressf.core.dto.commands.payment.RefundPaymentCommand;
 import by.pressf.core.dto.commands.product.CancelProductReservationCommand;
-import by.pressf.core.dto.events.emailnotification.EmailMessage;
 import by.pressf.core.dto.events.order.OrderRejectedEvent;
 import by.pressf.core.dto.events.payment.PaymentRefundedEvent;
 import by.pressf.core.dto.events.product.ProductReservationCanceledEvent;
@@ -58,22 +58,23 @@ public class OrderRollbackSaga { // Здесь события на продол�
             orderHistoryService.createSuccessLog(event.orderId(),
                     "OrderMS: the order status has been successfully changed to REJECTED");
 
-            EmailMessage message = new EmailMessage(
+            SendEmailOrderCommand message = new SendEmailOrderCommand(
                     "artemsurmenok@gmail.com",
                     "TEST subject: REJECT",
-                    "TEST body: REJECT"
+                    "TEST body: REJECT",
+                    event.orderId()
             );
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("email-notification.events.topic.name"),
+                            env.getRequiredProperty("email-notification.commands.topic.name"),
                             event.orderId().toString(),
                             message
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The EmailMessage message was sent to the send-notification-event topic.");
+            log.info("The SendEmailOrderCommand message was sent to the email-notification-commands topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)

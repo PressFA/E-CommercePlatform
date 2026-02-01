@@ -77,20 +77,28 @@ user:
         insync:
           replicas: 2
 
-shopping-cart:
+email-notification:
   events:
     topic:
-      name: cart-checkout-initiated
+      name: email-notification-events
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
+  commands:
+    topic:
+      name: email-notification-commands
       partitions: 3
       replicas: 3
       min:
         insync:
           replicas: 2
 
-email-notification:
+shopping-cart:
   events:
     topic:
-      name: send-notification-event
+      name: cart-checkout-initiated
       partitions: 3
       replicas: 3
       min:

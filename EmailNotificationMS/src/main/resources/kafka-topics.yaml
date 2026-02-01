@@ -1,7 +1,15 @@
 email-notification:
   events:
     topic:
-      name: send-notification-event
+      name: email-notification-events
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
+  commands:
+    topic:
+      name: email-notification-commands
       partitions: 3
       replicas: 3
       min:
