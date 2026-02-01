@@ -1,7 +1,6 @@
 package by.pressf.productms.service.handler;
 
 import by.pressf.core.dto.commands.product.CancelProductReservationCommand;
-import by.pressf.core.dto.commands.order.ConfirmOrderCommand;
 import by.pressf.core.dto.commands.product.ReserveProductCommand;
 import by.pressf.core.dto.events.product.ProductReservationCancelFailedEvent;
 import by.pressf.core.dto.events.product.ProductReservationCanceledEvent;
@@ -13,7 +12,7 @@ import by.pressf.productms.dao.entity.EventEntity;
 import by.pressf.productms.dao.repository.EventRepository;
 import by.pressf.productms.dto.ProductReservationRequest;
 import by.pressf.productms.exception.ProductInsufficientException;
-import by.pressf.productms.exception.ProductNotFoundException;
+import by.pressf.productms.exception.ProductNotFoundByOrderIdException;
 import by.pressf.productms.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +34,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = {
-        "${product.commands.topic.name}",
-        "${order.commands.topic.name}"
-        }, groupId = "product-ms")
+@KafkaListener(topics = "${product.commands.topic.name}", groupId = "product-ms")
 public class ProductCommandsHandler {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -94,7 +90,7 @@ public class ProductCommandsHandler {
 
             throw new RetryableException(e, env.getRequiredProperty("product.events.topic.name"),
                     command.orderId(), failedEvent);
-        } catch (ProductNotFoundException | ProductInsufficientException | DataAccessException e) {
+        } catch (ProductNotFoundByOrderIdException | ProductInsufficientException | DataAccessException e) {
             log.error(e.getMessage());
 
             ProductReservationFailedEvent failedEvent = new ProductReservationFailedEvent(command.orderId());
@@ -143,39 +139,13 @@ public class ProductCommandsHandler {
 
             throw new RetryableException(e, env.getRequiredProperty("product.events.topic.name"),
                     command.orderId(), failedEvent);
-        } catch (ProductNotFoundException | DataAccessException e) {
+        } catch (ProductNotFoundByOrderIdException | DataAccessException e) {
             log.error(e.getMessage());
 
             ProductReservationCancelFailedEvent failedEvent = new ProductReservationCancelFailedEvent(command.orderId());
 
             throw new NotRetryableException(e, env.getRequiredProperty("product.events.topic.name"),
                     command.orderId(), failedEvent);
-        }
-    }
-
-    @KafkaHandler
-    @Transactional("transactionManager")
-    public void handleCommand(@Payload ConfirmOrderCommand command,
-                              @Header("messageId") String messageId) {
-        try {
-            log.info("The ConfirmOrderCommand command from the product-commands topic has been received");
-
-            EventEntity processedEvent = eventRepository.findByMessageId(messageId);
-            if (processedEvent != null) {
-                log.info("The ConfirmOrderCommand message with messageId={} has already been processed", messageId);
-                return;
-            }
-
-            productService.confirmProductOrder(command.orderId());
-            log.info("The order of the product with the ID {} has been confirmed", command.orderId());
-
-            eventRepository.save(EventEntity.builder()
-                    .messageId(messageId)
-                    .build());
-            log.info("The ConfirmOrderCommand message with messageId={} has been processed", messageId);
-        } catch (DataAccessException e) {
-            log.error(e.getMessage());
-            throw new NotRetryableException(e);
         }
     }
 }

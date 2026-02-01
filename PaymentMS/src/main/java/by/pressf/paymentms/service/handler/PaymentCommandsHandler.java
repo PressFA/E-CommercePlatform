@@ -12,7 +12,7 @@ import by.pressf.paymentms.dao.entity.EventEntity;
 import by.pressf.paymentms.dao.repository.EventRepository;
 import by.pressf.paymentms.dto.CreateOrderPaymentRequest;
 import by.pressf.paymentms.exception.PaymentFailedException;
-import by.pressf.paymentms.exception.PaymentNotFoundException;
+import by.pressf.paymentms.exception.PaymentNotFoundByOrderIdException;
 import by.pressf.paymentms.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +88,7 @@ public class PaymentCommandsHandler {
             PaymentChargeFailedEvent failedEvent = new PaymentChargeFailedEvent(command.orderId());
 
             throw handleStripeException(e, command.orderId(), failedEvent);
-        } catch (PaymentNotFoundException | DataAccessException e) {
+        } catch (PaymentNotFoundByOrderIdException | DataAccessException e) {
             log.error(e.getMessage());
 
             PaymentChargeFailedEvent failedEvent = new PaymentChargeFailedEvent(command.orderId());
@@ -136,7 +136,7 @@ public class PaymentCommandsHandler {
             PaymentRefundFailedEvent failedEvent = new PaymentRefundFailedEvent(command.orderId());
 
             throw handleStripeException(e, command.orderId(), failedEvent);
-        } catch (PaymentNotFoundException | DataAccessException e) {
+        } catch (PaymentNotFoundByOrderIdException | DataAccessException e) {
             log.error(e.getMessage());
 
             PaymentRefundFailedEvent failedEvent = new PaymentRefundFailedEvent(command.orderId());

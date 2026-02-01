@@ -6,9 +6,13 @@ import by.pressf.productms.dao.entity.status.ProductStatus;
 import by.pressf.productms.dao.repository.ProductHistoryRepository;
 import by.pressf.productms.dao.repository.ProductRepository;
 import by.pressf.productms.dto.ProductCreationData;
+import by.pressf.productms.dto.ProductData;
+import by.pressf.productms.dto.ProductPatchingData;
 import by.pressf.productms.dto.ProductReservationRequest;
 import by.pressf.productms.exception.ProductInsufficientException;
+import by.pressf.productms.exception.ProductNotFoundByOrderIdException;
 import by.pressf.productms.exception.ProductNotFoundException;
+import by.pressf.productms.exception.ProductOverflowException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -38,9 +42,34 @@ public class ProductService {
         return productEntity.getId();
     }
 
+    @Transactional("transactionManager")
+    public ProductData patchProduct(ProductPatchingData patchingData) {
+        ProductEntity product = productRepository.findById(patchingData.productId())
+                .orElseThrow(() -> new ProductNotFoundException(patchingData.productId()));
+
+        if (patchingData.quantity() != null) {
+            int totalQuantity = product.getQuantity() + patchingData.quantity();
+            if (totalQuantity <= 100) {
+                product.setQuantity(totalQuantity);
+            } else {
+                throw new ProductOverflowException(totalQuantity);
+            }
+        }
+
+        if (patchingData.price() != null) {
+            product.setPrice(patchingData.price());
+        }
+
+        productRepository.save(product);
+        log.info("Patch of product with ID {} completed successfully. New quantity: {}, new price: {}",
+                product.getId(), product.getQuantity(), product.getPrice());
+
+        return new ProductData(product.getId(), product.getName(), product.getQuantity(), product.getPrice());
+    }
+
     public BigDecimal reserveProduct(ProductReservationRequest req) {
         ProductEntity product = productRepository.findById(req.productId())
-                .orElseThrow(() -> new ProductNotFoundException(req.productId()));
+                .orElseThrow(() -> new ProductNotFoundByOrderIdException(req.productId()));
 
         if (req.quantity() > product.getQuantity()) {
             throw new ProductInsufficientException(req.productId(), req.orderId());
@@ -61,20 +90,11 @@ public class ProductService {
         return product.getPrice().multiply(new BigDecimal(req.quantity()));
     }
 
-    public void confirmProductOrder(UUID orderId) {
-        ProductHistoryEntity entity = productHistoryRepository.findByOrderId(orderId);
-
-        entity.setStatus(ProductStatus.CONFIRMED);
-        entity.setUpdatedAt(LocalDateTime.now());
-
-        productHistoryRepository.save(entity);
-    }
-
     public void cancelProductReservation(UUID orderId) {
         ProductHistoryEntity productHistory = productHistoryRepository.findByOrderId(orderId);
 
         ProductEntity product = productRepository.findById(productHistory.getProduct().getId())
-                .orElseThrow(() -> new ProductNotFoundException(productHistory.getProduct().getId()));
+                .orElseThrow(() -> new ProductNotFoundByOrderIdException(productHistory.getProduct().getId()));
 
         product.setQuantity(product.getQuantity() + productHistory.getQuantity());
         productRepository.save(product);

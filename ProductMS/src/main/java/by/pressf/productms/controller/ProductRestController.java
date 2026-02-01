@@ -1,16 +1,13 @@
 package by.pressf.productms.controller;
 
-import by.pressf.productms.dto.CreateProductRequest;
-import by.pressf.productms.dto.ProductCreationData;
+import by.pressf.productms.dto.*;
 import by.pressf.productms.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -22,7 +19,7 @@ public class ProductRestController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<?> createProduct(@RequestBody CreateProductRequest req) {
+    public ResponseEntity<?> createProduct(@RequestBody @Valid CreateProductRequest req) {
         log.info("A request was received to add a product with the name {} to the catalog", req.name());
 
         ProductCreationData productCreationData = new ProductCreationData(
@@ -34,5 +31,21 @@ public class ProductRestController {
         UUID productId = productService.createProduct(productCreationData);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(productId);
+    }
+
+    @PatchMapping
+    public ResponseEntity<?> patchProduct(@RequestBody @Valid PatchProductRequest req) {
+        log.info("A request was received to update the quantity and/or price of an item with the {} ID",
+                req.productId());
+
+        ProductPatchingData productPatchingData = new ProductPatchingData(
+                req.productId(),
+                req.quantity(),
+                req.price()
+        );
+
+        ProductData data = productService.patchProduct(productPatchingData);
+
+        return ResponseEntity.status(HttpStatus.OK).body(data);
     }
 }

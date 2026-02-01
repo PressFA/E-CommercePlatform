@@ -43,14 +43,4 @@ public class KafkaTopicConfig {
                         env.getRequiredProperty("product.dlt.min.insync.replicas")))
                 .build();
     }
-
-    @Bean
-    NewTopic createOrderCommandsTopic() {
-        return TopicBuilder.name(env.getRequiredProperty("order.commands.topic.name"))
-                .partitions(Integer.parseInt(env.getRequiredProperty("order.commands.topic.partitions")))
-                .replicas(Integer.parseInt(env.getRequiredProperty("order.commands.topic.replicas")))
-                .configs(Map.of("min.insync.replicas",
-                        env.getRequiredProperty("order.commands.topic.min.insync.replicas")))
-                .build();
-    }
 }

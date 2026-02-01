@@ -7,7 +7,7 @@ import by.pressf.paymentms.dto.CreateOrderPaymentRequest;
 import by.pressf.paymentms.dto.StripePaymentDto;
 import by.pressf.paymentms.dto.StripeRefundDto;
 import by.pressf.paymentms.exception.PaymentFailedException;
-import by.pressf.paymentms.exception.PaymentNotFoundException;
+import by.pressf.paymentms.exception.PaymentNotFoundByOrderIdException;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,7 +49,7 @@ public class PaymentService {
             PaymentEntity payment = paymentRepository.findByOrderId(orderId);
 
             if (payment == null) {
-                throw new PaymentNotFoundException(orderId);
+                throw new PaymentNotFoundByOrderIdException(orderId);
             }
 
             log.info("Sending a refund to the bank gateway");

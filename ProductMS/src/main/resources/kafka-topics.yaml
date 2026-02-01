@@ -22,13 +22,3 @@ product:
     min:
       insync:
         replicas: 1
-
-order:
-  commands:
-    topic:
-      name: order-commands
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2

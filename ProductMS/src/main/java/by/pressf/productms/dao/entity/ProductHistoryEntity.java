@@ -16,7 +16,7 @@ import java.util.UUID;
 @Entity @Table(name = "product_history")
 public class ProductHistoryEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private UUID id;
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
     @ManyToOne(fetch = FetchType.LAZY)
