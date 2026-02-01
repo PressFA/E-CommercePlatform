@@ -8,5 +8,4 @@ import java.util.UUID;
 
 @Repository
 public interface OrderHistoryRepository extends JpaRepository<OrderHistoryEntity, Long> {
-    OrderHistoryEntity findByOrderId(UUID orderId);
 }

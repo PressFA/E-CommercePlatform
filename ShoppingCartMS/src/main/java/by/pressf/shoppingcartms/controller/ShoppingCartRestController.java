@@ -1,6 +1,5 @@
 package by.pressf.shoppingcartms.controller;
 
-import by.pressf.core.exceptions.AppError;
 import by.pressf.shoppingcartms.dto.CartInfo;
 import by.pressf.shoppingcartms.dto.CreateCartRequest;
 import by.pressf.shoppingcartms.dto.QuantityChangeCart;

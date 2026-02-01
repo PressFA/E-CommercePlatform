@@ -12,6 +12,7 @@ import by.pressf.paymentms.dao.entity.EventEntity;
 import by.pressf.paymentms.dao.repository.EventRepository;
 import by.pressf.paymentms.dto.CreateOrderPaymentRequest;
 import by.pressf.paymentms.exception.PaymentFailedException;
+import by.pressf.paymentms.exception.PaymentNotFoundException;
 import by.pressf.paymentms.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -86,27 +87,8 @@ public class PaymentCommandsHandler {
 
             PaymentChargeFailedEvent failedEvent = new PaymentChargeFailedEvent(command.orderId());
 
-            switch (e.getStatusCode()) {
-                // ошибка со стороны нашего сервиса
-                case 0 -> {
-                    log.error("Error on the part of our service");
-                    throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
-                            command.orderId(), failedEvent);
-                }
-                // постоянная ошибка
-                case 400, 401, 402, 403, 404 -> throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
-                        command.orderId(), failedEvent);
-                // временная ошибка
-                case 409, 424, 429, 500, 502, 503, 504 -> throw new RetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
-                        command.orderId(), failedEvent);
-                // неизвестная ошибка
-                default -> {
-                    log.error("Unknown error");
-                    throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
-                            command.orderId(), failedEvent);
-                }
-            }
-        } catch (DataAccessException e) {
+            throw handleStripeException(e, command.orderId(), failedEvent);
+        } catch (PaymentNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
 
             PaymentChargeFailedEvent failedEvent = new PaymentChargeFailedEvent(command.orderId());
@@ -153,27 +135,8 @@ public class PaymentCommandsHandler {
 
             PaymentRefundFailedEvent failedEvent = new PaymentRefundFailedEvent(command.orderId());
 
-            switch (e.getStatusCode()) {
-                // ошибка со стороны нашего сервиса
-                case 0 -> {
-                    log.error("Error on the part of our service");
-                    throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
-                            command.orderId(), failedEvent);
-                }
-                // постоянная ошибка
-                case 400, 401, 402, 403, 404 -> throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
-                        command.orderId(), failedEvent);
-                // временная ошибка
-                case 409, 424, 429, 500, 502, 503, 504 -> throw new RetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
-                        command.orderId(), failedEvent);
-                // неизвестная ошибка
-                default -> {
-                    log.error("Unknown error");
-                    throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
-                            command.orderId(), failedEvent);
-                }
-            }
-        } catch (DataAccessException e) {
+            throw handleStripeException(e, command.orderId(), failedEvent);
+        } catch (PaymentNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
 
             PaymentRefundFailedEvent failedEvent = new PaymentRefundFailedEvent(command.orderId());
@@ -181,5 +144,20 @@ public class PaymentCommandsHandler {
             throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
                     command.orderId(), failedEvent);
         }
+    }
+
+    private <T> RuntimeException handleStripeException(PaymentFailedException e, UUID orderId, T failedEvent) {
+        String topic = env.getRequiredProperty("payment.events.topic.name");
+
+        RuntimeException returnEx;
+        switch (e.getStatusCode()) {
+            case 400, 401, 402, 403, 404 ->
+                    returnEx = new RetryableException(e, topic, orderId, failedEvent);
+            default -> {
+                if (e.getStatusCode() == 0) log.error("Error on the part of our service");
+                returnEx = new NotRetryableException(e, topic, orderId, failedEvent);
+            }
+        }
+        return returnEx;
     }
 }

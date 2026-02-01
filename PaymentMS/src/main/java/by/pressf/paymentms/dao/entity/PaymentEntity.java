@@ -22,6 +22,8 @@ public class PaymentEntity {
     private UUID userId;
     @Column(name = "order_id")
     private UUID orderId;
+    @Column(name = "stripe_id")
+    private String stripeId;
     @Column(nullable = false)
     private BigDecimal amount;
     @Column(name = "created_at", nullable = false)

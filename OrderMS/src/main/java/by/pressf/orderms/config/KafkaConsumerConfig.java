@@ -75,8 +75,7 @@ public class KafkaConsumerConfig {
     логику обработки сообщения перед публикацией в dead letter topic (DLT)
     */
     @Bean
-    DeadLetterPublishingRecoverer recoverer(KafkaTemplate<String, Object> kafkaTemplateDlt, // для DLT
-                                            KafkaTemplate<String, Object> kafkaTemplate ) { // для обычных топиков
+    DeadLetterPublishingRecoverer recoverer(KafkaTemplate<String, Object> kafkaTemplateDlt) {
         return new DeadLetterPublishingRecoverer(
                 kafkaTemplateDlt,
                 (consumerRecord, ex) -> {

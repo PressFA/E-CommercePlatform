@@ -4,7 +4,10 @@ import by.pressf.paymentms.dao.entity.PaymentEntity;
 import by.pressf.paymentms.dao.entity.type.PaymentType;
 import by.pressf.paymentms.dao.repository.PaymentRepository;
 import by.pressf.paymentms.dto.CreateOrderPaymentRequest;
+import by.pressf.paymentms.dto.StripePaymentDto;
+import by.pressf.paymentms.dto.StripeRefundDto;
 import by.pressf.paymentms.exception.PaymentFailedException;
+import by.pressf.paymentms.exception.PaymentNotFoundException;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,12 +26,13 @@ public class PaymentService {
     public void createOrderPayment(CreateOrderPaymentRequest req) {
         try {
             log.info("Sending a payment to a bank gateway");
-            stripeService.createPayment(req.amount());
+            String stripeId = stripeService.createPayment(new StripePaymentDto(req.orderId().toString(), req.amount()));
             log.info("The payment sent to the bank gateway was successful");
 
             PaymentEntity payment = PaymentEntity.builder()
                     .userId(req.userId())
                     .orderId(req.orderId())
+                    .stripeId(stripeId)
                     .amount(req.amount())
                     .createdAt(LocalDateTime.now())
                     .type(PaymentType.PAYMENT)
@@ -44,8 +48,12 @@ public class PaymentService {
         try {
             PaymentEntity payment = paymentRepository.findByOrderId(orderId);
 
+            if (payment == null) {
+                throw new PaymentNotFoundException(orderId);
+            }
+
             log.info("Sending a refund to the bank gateway");
-            stripeService.createRefundPayment(payment.getAmount());
+            stripeService.createRefundPayment(new StripeRefundDto(payment.getOrderId().toString(), payment.getStripeId()));
             log.info("The refund sent to the bank gateway was successfully completed");
 
             PaymentEntity createPayment = PaymentEntity.builder()

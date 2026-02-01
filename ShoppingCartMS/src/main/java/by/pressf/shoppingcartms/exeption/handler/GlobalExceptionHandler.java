@@ -20,9 +20,9 @@ public class GlobalExceptionHandler {
         BindingResult bindingResult = ex.getBindingResult();
         log.error("Failed validation: {}", bindingResult.getFieldErrors());
         Map<String, Object> errors = new HashMap<>();
-        bindingResult.getFieldErrors().forEach(error -> {
-            errors.put(error.getField(), error.getDefaultMessage());
-        });
+        bindingResult.getFieldErrors().forEach(error ->
+                errors.put(error.getField(), error.getDefaultMessage())
+        );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
