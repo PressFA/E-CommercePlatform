@@ -65,6 +65,7 @@ public class ProductCommandsHandler {
             ProductReservedEvent event = new ProductReservedEvent(
                     command.orderId(),
                     command.userId(),
+                    command.username(),
                     totalCostProduct
             );
 
@@ -86,14 +87,14 @@ public class ProductCommandsHandler {
         } catch (OptimisticLockingFailureException e) {
             log.error(e.getMessage());
 
-            ProductReservationFailedEvent failedEvent = new ProductReservationFailedEvent(command.orderId());
+            ProductReservationFailedEvent failedEvent = createFailedEvent(command);
 
             throw new RetryableException(e, env.getRequiredProperty("product.events.topic.name"),
                     command.orderId(), failedEvent);
         } catch (ProductNotFoundByOrderIdException | ProductInsufficientException | DataAccessException e) {
             log.error(e.getMessage());
 
-            ProductReservationFailedEvent failedEvent = new ProductReservationFailedEvent(command.orderId());
+            ProductReservationFailedEvent failedEvent = createFailedEvent(command);
 
             throw new NotRetryableException(e, env.getRequiredProperty("product.events.topic.name"),
                     command.orderId(), failedEvent);
@@ -116,7 +117,7 @@ public class ProductCommandsHandler {
             productService.cancelProductReservation(command.orderId());
             log.info("The product from the order with ID {} has been removed from the reservation", command.orderId());
 
-            ProductReservationCanceledEvent event = new ProductReservationCanceledEvent(command.orderId());
+            ProductReservationCanceledEvent event = new ProductReservationCanceledEvent(command.orderId(),command.username());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
                             env.getRequiredProperty("product.events.topic.name"),
@@ -135,17 +136,25 @@ public class ProductCommandsHandler {
         } catch (OptimisticLockingFailureException e) {
             log.error(e.getMessage());
 
-            ProductReservationCancelFailedEvent failedEvent = new ProductReservationCancelFailedEvent(command.orderId());
+            ProductReservationCancelFailedEvent failedEvent = createCancelFailedEvent(command);
 
             throw new RetryableException(e, env.getRequiredProperty("product.events.topic.name"),
                     command.orderId(), failedEvent);
         } catch (ProductNotFoundByOrderIdException | DataAccessException e) {
             log.error(e.getMessage());
 
-            ProductReservationCancelFailedEvent failedEvent = new ProductReservationCancelFailedEvent(command.orderId());
+            ProductReservationCancelFailedEvent failedEvent = createCancelFailedEvent(command);
 
             throw new NotRetryableException(e, env.getRequiredProperty("product.events.topic.name"),
                     command.orderId(), failedEvent);
         }
+    }
+
+    private ProductReservationFailedEvent createFailedEvent(ReserveProductCommand command) {
+        return new ProductReservationFailedEvent(command.orderId(), command.username());
+    }
+
+    private ProductReservationCancelFailedEvent createCancelFailedEvent(CancelProductReservationCommand command) {
+        return new ProductReservationCancelFailedEvent(command.orderId(), command.username());
     }
 }

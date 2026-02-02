@@ -22,7 +22,7 @@ public class PaymentEntity {
     private UUID userId;
     @Column(name = "order_id")
     private UUID orderId;
-    @Column(name = "stripe_id")
+    @Column(name = "stripe_id", nullable = false)
     private String stripeId;
     @Column(nullable = false)
     private BigDecimal amount;

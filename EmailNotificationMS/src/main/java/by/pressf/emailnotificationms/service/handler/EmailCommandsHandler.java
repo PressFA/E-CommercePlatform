@@ -38,7 +38,7 @@ public class EmailCommandsHandler {
     @KafkaHandler
     @Transactional("transactionManager")
     public void handleCommand(@Payload SendEmailOrderCommand command,
-                       @Header("messageId") String messageId) {
+                              @Header("messageId") String messageId) {
         try {
             log.info("The SendEmailOrderCommand command from the email-notification-commands topic has been received");
 

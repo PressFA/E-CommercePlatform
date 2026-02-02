@@ -3,9 +3,7 @@ package by.pressf.paymentms.service;
 import by.pressf.paymentms.dao.entity.PaymentEntity;
 import by.pressf.paymentms.dao.entity.type.PaymentType;
 import by.pressf.paymentms.dao.repository.PaymentRepository;
-import by.pressf.paymentms.dto.CreateOrderPaymentRequest;
-import by.pressf.paymentms.dto.StripePaymentDto;
-import by.pressf.paymentms.dto.StripeRefundDto;
+import by.pressf.paymentms.dto.*;
 import by.pressf.paymentms.exception.PaymentFailedException;
 import by.pressf.paymentms.exception.PaymentNotFoundByOrderIdException;
 import com.stripe.exception.StripeException;
@@ -26,7 +24,7 @@ public class PaymentService {
     public void createOrderPayment(CreateOrderPaymentRequest req) {
         try {
             log.info("Sending a payment to a bank gateway");
-            String stripeId = stripeService.createPayment(new StripePaymentDto(req.orderId().toString(), req.amount()));
+            String stripeId = stripeService.createPayment(new StripeOrderPaymentDto(req.orderId().toString(), req.amount()));
             log.info("The payment sent to the bank gateway was successful");
 
             PaymentEntity payment = PaymentEntity.builder()
@@ -53,18 +51,39 @@ public class PaymentService {
             }
 
             log.info("Sending a refund to the bank gateway");
-            stripeService.createRefundPayment(new StripeRefundDto(payment.getOrderId().toString(), payment.getStripeId()));
+            String stripeId = stripeService.createRefundPayment(new StripeRefundDto(payment.getOrderId().toString(), payment.getStripeId()));
             log.info("The refund sent to the bank gateway was successfully completed");
 
             PaymentEntity createPayment = PaymentEntity.builder()
                     .userId(payment.getUserId())
                     .orderId(payment.getOrderId())
+                    .stripeId(stripeId)
                     .amount(payment.getAmount())
                     .createdAt(LocalDateTime.now())
                     .type(PaymentType.REFUND)
                     .build();
 
             paymentRepository.save(createPayment);
+        } catch (StripeException e) {
+            throw new PaymentFailedException("A payment gateway error has occurred.", e.getStatusCode());
+        }
+    }
+
+    public void topUpBalance(UserBalanceRequest req) {
+        try {
+            log.info("Sending a balance top-up request to the bank gateway");
+            String stripeId = stripeService.createTopUpPayment(new StripeUserPaymentDto(req.userId(), req.amount()));
+            log.info("The balance top-up request to the bank gateway was successful");
+
+            PaymentEntity payment = PaymentEntity.builder()
+                    .userId(req.userId())
+                    .stripeId(stripeId)
+                    .amount(req.amount())
+                    .createdAt(LocalDateTime.now())
+                    .type(PaymentType.TOP_UP)
+                    .build();
+
+            paymentRepository.save(payment);
         } catch (StripeException e) {
             throw new PaymentFailedException("A payment gateway error has occurred.", e.getStatusCode());
         }

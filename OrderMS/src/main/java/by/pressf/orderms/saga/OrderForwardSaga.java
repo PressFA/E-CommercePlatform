@@ -66,6 +66,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
                     event.orderId(),
                     event.productId(),
                     event.userId(),
+                    event.username(),
                     event.quantity()
             );
 
@@ -109,6 +110,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
             ChargePaymentCommand command = new ChargePaymentCommand(
                     event.orderId(),
                     event.userId(),
+                    event.username(),
                     event.amount()
             );
 
@@ -152,6 +154,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
             DebitUserBalanceCommand command = new DebitUserBalanceCommand(
                     event.orderId(),
                     event.userId(),
+                    event.username(),
                     event.amount()
             );
 
@@ -195,6 +198,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
             ConfirmOrderCommand command = new ConfirmOrderCommand(
                     event.orderId(),
                     event.userId(),
+                    event.username(),
                     event.amount()
             );
 
@@ -236,7 +240,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
                     "OrderMS: The order status has been successfully changed to APPROVED");
 
             SendEmailOrderCommand message = new SendEmailOrderCommand(
-                    "artemsurmenok@gmail.com",
+                    event.username(),
                     "TEST subject: APPROVE",
                     "TEST body: APPROVE",
                     event.orderId()

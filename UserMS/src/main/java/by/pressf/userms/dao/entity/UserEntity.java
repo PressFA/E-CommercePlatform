@@ -16,10 +16,15 @@ import java.util.UUID;
 public class UserEntity {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+    @Column(unique = true, nullable = false)
+    private String username;
+    @Column(nullable = false)
+    private String password;
     @Column(nullable = false)
     private String name;
+    @Builder.Default
     @Column(nullable = false)
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
     @Version
     private int version;
 }

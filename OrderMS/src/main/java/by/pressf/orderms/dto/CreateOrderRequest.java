@@ -1,14 +1,15 @@
 package by.pressf.orderms.dto;
 
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.util.UUID;
 
 public record CreateOrderRequest(
         @NotNull(message = "The userId field is empty!")
         UUID userId,
+        @NotBlank(message = "The username(email) field is empty!")
+        @Email(message = "Invalid email address!")
+        String username,
         @NotNull(message = "The productId field is empty!")
         UUID productId,
         @NotNull(message = "The quantity field is empty!")

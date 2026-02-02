@@ -5,5 +5,6 @@ import java.util.UUID;
 
 public record UserBalanceDebitedEvent(UUID orderId,
                                       UUID userId,
+                                      String username,
                                       BigDecimal amount) {
 }

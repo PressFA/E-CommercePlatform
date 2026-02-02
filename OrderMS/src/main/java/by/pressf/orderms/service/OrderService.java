@@ -38,6 +38,7 @@ public class OrderService {
         OrderCreatedEvent event = new OrderCreatedEvent(
                 orderEntity.getId(),
                 creationData.userId(),
+                creationData.username(),
                 creationData.productId(),
                 creationData.quantity()
         );

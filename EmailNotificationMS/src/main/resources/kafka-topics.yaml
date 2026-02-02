@@ -22,3 +22,22 @@ email-notification:
     min:
       insync:
         replicas: 1
+
+user-email:
+  events:
+    topic:
+      name: user-email-events
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2
+email-payment:
+  events:
+    topic:
+      name: email-payment-events
+      partitions: 3
+      replicas: 3
+      min:
+        insync:
+          replicas: 2

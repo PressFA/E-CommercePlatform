@@ -43,4 +43,24 @@ public class KafkaTopicConfig {
                         env.getRequiredProperty("email-notification.dlt.min.insync.replicas")))
                 .build();
     }
+
+    @Bean
+    NewTopic createUserEmailEventsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("user-email.events.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("user-email.events.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("user-email.events.topic.replicas")))
+                .configs(Map.of("min.insync.replicas",
+                        env.getRequiredProperty("user-email.events.topic.min.insync.replicas")))
+                .build();
+    }
+
+    @Bean
+    NewTopic createEmailPaymentEventsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("email-payment.events.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("email-payment.events.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("email-payment.events.topic.replicas")))
+                .configs(Map.of("min.insync.replicas",
+                        env.getRequiredProperty("email-payment.events.topic.min.insync.replicas")))
+                .build();
+    }
 }

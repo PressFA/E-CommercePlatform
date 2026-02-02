@@ -10,8 +10,7 @@ import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import by.pressf.userms.dao.entity.EventEntity;
 import by.pressf.userms.dao.repository.EventRepository;
-import by.pressf.userms.dto.CreditUserBalanceRequest;
-import by.pressf.userms.dto.DebitUserBalanceRequest;
+import by.pressf.userms.dto.UserBalanceRequest;
 import by.pressf.userms.exception.InsufficientBalanceException;
 import by.pressf.userms.exception.UserNotFoundException;
 import by.pressf.userms.service.UserService;
@@ -54,12 +53,13 @@ public class UserCommandsHandler {
                 return;
             }
 
-            userService.debitUserBalance(new DebitUserBalanceRequest(command.userId(), command.amount()));
+            userService.debitUserBalance(new UserBalanceRequest(command.userId(), command.amount()));
             log.info("Debiting a user's balance with id {}", command.userId());
 
             UserBalanceDebitedEvent event = new UserBalanceDebitedEvent(
                     command.orderId(),
                     command.userId(),
+                    command.username(),
                     command.amount()
             );
 
@@ -81,14 +81,14 @@ public class UserCommandsHandler {
         } catch (OptimisticLockingFailureException e) {
             log.error(e.getMessage());
 
-            UserBalanceDebitFailedEvent failedEvent = new UserBalanceDebitFailedEvent(command.orderId());
+            UserBalanceDebitFailedEvent failedEvent = createDebitFailedEvent(command);
 
             throw new RetryableException(e, env.getRequiredProperty("user.events.topic.name"),
                     command.orderId(), failedEvent);
         } catch (UserNotFoundException | InsufficientBalanceException | DataAccessException e) {
             log.error(e.getMessage());
 
-            UserBalanceDebitFailedEvent failedEvent = new UserBalanceDebitFailedEvent(command.orderId());
+            UserBalanceDebitFailedEvent failedEvent = createDebitFailedEvent(command);
 
             throw new NotRetryableException(e, env.getRequiredProperty("user.events.topic.name"),
                     command.orderId(), failedEvent);
@@ -108,10 +108,10 @@ public class UserCommandsHandler {
                 return;
             }
 
-            userService.creditUserBalance(new CreditUserBalanceRequest(command.userId(), command.amount()));
+            userService.creditUserBalance(new UserBalanceRequest(command.userId(), command.amount()));
             log.info("The balance of the user with ID {} has been topped up", command.userId());
 
-            UserBalanceDebitCanceledEvent event = new UserBalanceDebitCanceledEvent(command.orderId());
+            UserBalanceDebitCanceledEvent event = new UserBalanceDebitCanceledEvent(command.orderId(), command.username());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
                             env.getRequiredProperty("user.events.topic.name"),
@@ -130,17 +130,25 @@ public class UserCommandsHandler {
         } catch (OptimisticLockingFailureException e) {
             log.error(e.getMessage());
 
-            UserBalanceDebitCancelFailedEvent failedEvent = new UserBalanceDebitCancelFailedEvent(command.orderId());
+            UserBalanceDebitCancelFailedEvent failedEvent = createCancelFailedEvent(command);
 
             throw new RetryableException(e, env.getRequiredProperty("user.events.topic.name"),
                     command.orderId(), failedEvent);
         } catch (UserNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
 
-            UserBalanceDebitCancelFailedEvent failedEvent = new UserBalanceDebitCancelFailedEvent(command.orderId());
+            UserBalanceDebitCancelFailedEvent failedEvent = createCancelFailedEvent(command);
 
             throw new NotRetryableException(e, env.getRequiredProperty("user.events.topic.name"),
                     command.orderId(), failedEvent);
         }
+    }
+
+    private UserBalanceDebitFailedEvent createDebitFailedEvent(DebitUserBalanceCommand command) {
+        return new UserBalanceDebitFailedEvent(command.orderId(), command.username());
+    }
+
+    private UserBalanceDebitCancelFailedEvent createCancelFailedEvent(CancelUserBalanceDebitCommand command) {
+        return new UserBalanceDebitCancelFailedEvent(command.orderId(), command.username());
     }
 }

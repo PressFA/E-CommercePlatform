@@ -1,16 +1,13 @@
 package by.pressf.userms.controller;
 
-import by.pressf.userms.dto.CreateUserRequest;
-import by.pressf.userms.dto.UserCreationData;
+import by.pressf.userms.dto.*;
 import by.pressf.userms.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
@@ -22,16 +19,28 @@ public class UserRestController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody CreateUserRequest req) {
+    public ResponseEntity<?> createUser(@RequestBody @Valid CreateUserRequest req) {
         log.info("A request was received to create a user named {}", req.name());
 
         UserCreationData userCreationData = new UserCreationData(
-                req.name(),
-                req.balance()
+                req.username(),
+                req.password(),
+                req.name()
         );
 
         UUID userId = userService.createUser(userCreationData);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(userId);
+    }
+
+    @PatchMapping("/balance/top-up")
+    public ResponseEntity<?> topUpUsersBalance(@RequestBody @Valid TopUpBalanceRequest req) {
+        log.info("A request was received to top up the user's balance with the ID {}", req.userId());
+
+        UserBalanceRequest userBalanceRequest = new UserBalanceRequest(req.userId(), req.amount());
+
+        UserBalanceResponse resp = userService.topUpUserBalance(userBalanceRequest);
+
+        return ResponseEntity.status(HttpStatus.OK).body(resp);
     }
 }

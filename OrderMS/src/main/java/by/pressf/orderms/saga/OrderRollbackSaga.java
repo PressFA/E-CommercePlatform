@@ -59,7 +59,7 @@ public class OrderRollbackSaga { // Здесь события на продол�
                     "OrderMS: the order status has been successfully changed to REJECTED");
 
             SendEmailOrderCommand message = new SendEmailOrderCommand(
-                    "artemsurmenok@gmail.com",
+                    event.username(),
                     "TEST subject: REJECT",
                     "TEST body: REJECT",
                     event.orderId()
@@ -102,7 +102,7 @@ public class OrderRollbackSaga { // Здесь события на продол�
             orderHistoryService.createSuccessLog(event.orderId(),
                     "ProductMS: reservation has been successfully lifted from the product");
 
-            RejectOrderCommand command = new RejectOrderCommand(event.orderId());
+            RejectOrderCommand command = new RejectOrderCommand(event.orderId(), event.username());
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
@@ -141,7 +141,7 @@ public class OrderRollbackSaga { // Здесь события на продол�
             orderHistoryService.createSuccessLog(event.orderId(),
                     "PaymentMS: money has been successfully refunded from the payment");
 
-            CancelProductReservationCommand command = new CancelProductReservationCommand(event.orderId());
+            CancelProductReservationCommand command = new CancelProductReservationCommand(event.orderId(), event.username());
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
@@ -180,7 +180,7 @@ public class OrderRollbackSaga { // Здесь события на продол�
             orderHistoryService.createSuccessLog(event.orderID(),
                     "UserMS: the money was successfully refunded to the user");
 
-            RefundPaymentCommand command = new RefundPaymentCommand(event.orderID());
+            RefundPaymentCommand command = new RefundPaymentCommand(event.orderID(), event.username());
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(

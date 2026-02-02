@@ -52,7 +52,7 @@ public class OrderCommandsHandler {
             orderService.approveOrder(command.orderId());
             log.info("The order with the ID {} has been approved", command.orderId());
 
-            OrderCompletedEvent event = new OrderCompletedEvent(command.orderId());
+            OrderCompletedEvent event = new OrderCompletedEvent(command.orderId(), command.username());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
                             env.getRequiredProperty("order.events.topic.name"),
@@ -74,6 +74,7 @@ public class OrderCommandsHandler {
             OrderCompletionFailedEvent failedEvent = new OrderCompletionFailedEvent(
                     command.orderId(),
                     command.userId(),
+                    command.username(),
                     command.amount()
             );
 
@@ -98,7 +99,7 @@ public class OrderCommandsHandler {
             orderService.rejectOrder(command.orderId());
             log.info("The order with ID {} has been rejected", command.orderId());
 
-            OrderRejectedEvent event = new OrderRejectedEvent(command.orderId());
+            OrderRejectedEvent event = new OrderRejectedEvent(command.orderId(), command.username());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
                             env.getRequiredProperty("order.events.topic.name"),
@@ -117,7 +118,7 @@ public class OrderCommandsHandler {
         } catch (OrderNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
 
-            OrderRejectionFailedEvent failedEvent = new OrderRejectionFailedEvent(command.orderId());
+            OrderRejectionFailedEvent failedEvent = new OrderRejectionFailedEvent(command.orderId(), command.username());
 
             throw new NotRetryableException(e, env.getRequiredProperty("order.events.topic.name"),
                     command.orderId(), failedEvent);

@@ -5,5 +5,6 @@ import java.util.UUID;
 
 public record CancelUserBalanceDebitCommand(UUID orderId,
                                             UUID userId,
+                                            String username,
                                             BigDecimal amount) {
 }

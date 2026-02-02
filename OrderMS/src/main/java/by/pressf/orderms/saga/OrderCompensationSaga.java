@@ -60,7 +60,7 @@ public class OrderCompensationSaga { // Здесь события, когда о
             orderHistoryService.createFailLog(event.orderId(),
                     "ProductMS: the product could not be booked; for more information, see the logs.");
 
-            RejectOrderCommand command = new RejectOrderCommand(event.orderId());
+            RejectOrderCommand command = new RejectOrderCommand(event.orderId(), event.username());
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
@@ -99,7 +99,7 @@ public class OrderCompensationSaga { // Здесь события, когда о
             orderHistoryService.createFailLog(event.orderId(),
                     "PaymentMS: couldn't pay for the product; for more information, see the logs.");
 
-            CancelProductReservationCommand command = new CancelProductReservationCommand(event.orderId());
+            CancelProductReservationCommand command = new CancelProductReservationCommand(event.orderId(), event.username());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
                             env.getRequiredProperty("product.commands.topic.name"),
@@ -137,7 +137,7 @@ public class OrderCompensationSaga { // Здесь события, когда о
             orderHistoryService.createFailLog(event.orderId(),
                     "UserMS: couldn't change user's balance; for more information, see the logs.");
 
-            RefundPaymentCommand command = new RefundPaymentCommand(event.orderId());
+            RefundPaymentCommand command = new RefundPaymentCommand(event.orderId(), event.username());
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
@@ -177,7 +177,7 @@ public class OrderCompensationSaga { // Здесь события, когда о
                     "OrderMS: couldn't change the order status to APPROVED; for more information, see the logs.");
 
             SendEmailOrderCommand command = new SendEmailOrderCommand(
-                    "artemsurmenok@gmail.com",
+                    event.username(),
                     "TEST subject: APPROVE",
                     "TEST body: APPROVE",
                     event.orderId()

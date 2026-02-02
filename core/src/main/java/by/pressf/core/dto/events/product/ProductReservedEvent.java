@@ -5,5 +5,6 @@ import java.util.UUID;
 
 public record ProductReservedEvent(UUID orderId,
                                    UUID userId,
+                                   String username,
                                    BigDecimal amount) {
 }

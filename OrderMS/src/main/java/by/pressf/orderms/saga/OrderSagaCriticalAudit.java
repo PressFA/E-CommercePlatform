@@ -62,7 +62,7 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
                     "OrderMS(Warning!!!): an error occurred while compensating for a transaction; for more information, see the logs.");
 
             SendEmailOrderCommand message = new SendEmailOrderCommand(
-                    "artemsurmenok@gmail.com",
+                    event.username(),
                     "TEST subject: REJECT",
                     "TEST body: REJECT",
                     event.orderId()
@@ -108,7 +108,7 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
             orderHistoryService.createFailLog(event.orderId(),
                     "ProductMS(Warning!!!): an error occurred while compensating for a transaction; for more information, see the logs.");
 
-            RejectOrderCommand command = new RejectOrderCommand(event.orderId());
+            RejectOrderCommand command = new RejectOrderCommand(event.orderId(), event.username());
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
@@ -150,7 +150,7 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
             orderHistoryService.createFailLog(event.orderId(),
                     "PaymentMS(Warning!!!): an error occurred while compensating for a transaction; for more information, see the logs.");
 
-            CancelProductReservationCommand command = new CancelProductReservationCommand(event.orderId());
+            CancelProductReservationCommand command = new CancelProductReservationCommand(event.orderId(), event.username());
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
@@ -192,7 +192,7 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
             orderHistoryService.createFailLog(event.orderId(),
                     "UserMS(Warning!!!): an error occurred while compensating for a transaction; for more information, see the logs.");
 
-            RefundPaymentCommand command = new RefundPaymentCommand(event.orderId());
+            RefundPaymentCommand command = new RefundPaymentCommand(event.orderId(), event.username());
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(

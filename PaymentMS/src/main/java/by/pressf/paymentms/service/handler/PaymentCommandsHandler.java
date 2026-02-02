@@ -64,6 +64,7 @@ public class PaymentCommandsHandler {
             PaymentChargedEvent event = new PaymentChargedEvent(
                     command.orderId(),
                     command.userId(),
+                    command.username(),
                     command.amount()
             );
 
@@ -85,13 +86,13 @@ public class PaymentCommandsHandler {
         } catch (PaymentFailedException e) {
             log.error(e.getMessage());
 
-            PaymentChargeFailedEvent failedEvent = new PaymentChargeFailedEvent(command.orderId());
+            PaymentChargeFailedEvent failedEvent = createChargeFailedEvent(command);
 
             throw handleStripeException(e, command.orderId(), failedEvent);
         } catch (PaymentNotFoundByOrderIdException | DataAccessException e) {
             log.error(e.getMessage());
 
-            PaymentChargeFailedEvent failedEvent = new PaymentChargeFailedEvent(command.orderId());
+            PaymentChargeFailedEvent failedEvent = createChargeFailedEvent(command);
 
             throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
                     command.orderId(), failedEvent);
@@ -114,7 +115,7 @@ public class PaymentCommandsHandler {
             paymentService.refundOrderPayment(command.orderId());
             log.info("The refund for order ID {} has been successfully processed", command.orderId());
 
-            PaymentRefundedEvent event = new PaymentRefundedEvent(command.orderId());
+            PaymentRefundedEvent event = new PaymentRefundedEvent(command.orderId(), command.username());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
                             env.getRequiredProperty("payment.events.topic.name"),
@@ -133,13 +134,13 @@ public class PaymentCommandsHandler {
         } catch (PaymentFailedException e) {
             log.error(e.getMessage());
 
-            PaymentRefundFailedEvent failedEvent = new PaymentRefundFailedEvent(command.orderId());
+            PaymentRefundFailedEvent failedEvent = createRefundFailedEvent(command);
 
             throw handleStripeException(e, command.orderId(), failedEvent);
         } catch (PaymentNotFoundByOrderIdException | DataAccessException e) {
             log.error(e.getMessage());
 
-            PaymentRefundFailedEvent failedEvent = new PaymentRefundFailedEvent(command.orderId());
+            PaymentRefundFailedEvent failedEvent = createRefundFailedEvent(command);
 
             throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
                     command.orderId(), failedEvent);
@@ -159,5 +160,13 @@ public class PaymentCommandsHandler {
             }
         }
         return returnEx;
+    }
+
+    private PaymentChargeFailedEvent createChargeFailedEvent(ChargePaymentCommand command) {
+        return new PaymentChargeFailedEvent(command.orderId(), command.username());
+    }
+
+    private PaymentRefundFailedEvent createRefundFailedEvent(RefundPaymentCommand command) {
+        return new PaymentRefundFailedEvent(command.orderId(), command.username());
     }
 }

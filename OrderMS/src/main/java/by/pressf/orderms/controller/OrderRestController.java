@@ -29,6 +29,7 @@ public class OrderRestController {
 
         OrderCreationData orderCreationData = new OrderCreationData(
                 req.userId(),
+                req.username(),
                 req.productId(),
                 req.quantity()
         );

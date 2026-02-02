@@ -2,6 +2,7 @@ package by.pressf.shoppingcartms.exeption.handler;
 
 import by.pressf.core.exceptions.AppError;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -31,5 +32,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleAppError(AppError ex) {
         log.error(ex.getMessage());
         return ResponseEntity.status(ex.getStatus()).body(ex);
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<?> handleDatabaseErrors(Exception ex) {
+        log.error(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Internal server database error"));
     }
 }
