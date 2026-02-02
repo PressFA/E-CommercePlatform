@@ -39,7 +39,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    implementation 'by.pressf:core:0.0.2-SNAPSHOT'
+    implementation 'by.pressf:core:0.1.1-SNAPSHOT'
 }
 
 tasks.named('test') {

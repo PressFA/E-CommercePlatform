@@ -42,6 +42,7 @@ public class CartCheckoutListener {
 
             OrderCreationData orderCreationData = new OrderCreationData(
                     event.userId(),
+                    event.username(),
                     event.productId(),
                     event.quantity()
             );

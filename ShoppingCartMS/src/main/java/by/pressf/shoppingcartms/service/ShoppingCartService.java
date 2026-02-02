@@ -79,13 +79,14 @@ public class ShoppingCartService {
     }
 
     @Transactional("transactionManager")
-    public void createOrderFromShoppingCart(UUID id) {
+    public void createOrderFromShoppingCart(UUID id, String username) {
         CartEntity cart = shoppingCartRepository.findById(id)
                 .orElseThrow(() -> new AppError(404,
                         "Cart item with id " + id + " not found"));
 
         CreateOrderShoppingCart event = new CreateOrderShoppingCart(
                 cart.getUserId(),
+                username,
                 cart.getProductId(),
                 cart.getQuantity()
         );

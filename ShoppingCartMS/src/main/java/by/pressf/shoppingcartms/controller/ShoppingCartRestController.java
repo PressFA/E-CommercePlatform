@@ -1,5 +1,6 @@
 package by.pressf.shoppingcartms.controller;
 
+import by.pressf.shoppingcartms.dto.BuyProductRequest;
 import by.pressf.shoppingcartms.dto.CartInfo;
 import by.pressf.shoppingcartms.dto.CreateCartRequest;
 import by.pressf.shoppingcartms.dto.QuantityChangeCart;
@@ -40,12 +41,12 @@ public class ShoppingCartRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(cartInfo);
     }
 
-    @PostMapping("/buy/{id}")
-    public ResponseEntity<?> placeOrder(@PathVariable UUID id) {
-        log.info("Received request to place order from shopping cart item id: {}", id);
-        shoppingCartService.createOrderFromShoppingCart(id);
+    @PostMapping("/buy")
+    public ResponseEntity<?> placeOrder(@RequestBody @Valid BuyProductRequest req) {
+        log.info("Received request to place order from shopping cart item id: {}", req.id());
+        shoppingCartService.createOrderFromShoppingCart(req.id(), req.username());
 
-        log.info("Successfully processed checkout for cart item id: {}", id);
+        log.info("Successfully processed checkout for cart item id: {}", req.id());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
