@@ -1,8 +1,8 @@
 package by.pressf.emailnotificationms.service.handler;
 
-import by.pressf.core.dto.commands.emailnotification.SendEmailOrderCommand;
-import by.pressf.core.dto.events.emailnotification.EmailOrderNotSentEvent;
-import by.pressf.core.dto.events.emailnotification.EmailOrderSentEvent;
+import by.pressf.core.dto.orchestration.commands.emailnotification.SendEmailOrderCommand;
+import by.pressf.core.dto.orchestration.events.emailnotification.EmailOrderNotSentEvent;
+import by.pressf.core.dto.orchestration.events.emailnotification.EmailOrderSentEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import by.pressf.emailnotificationms.dao.entity.EventEntity;

@@ -1,11 +1,11 @@
 package by.pressf.productms.service.handler;
 
-import by.pressf.core.dto.commands.product.CancelProductReservationCommand;
-import by.pressf.core.dto.commands.product.ReserveProductCommand;
-import by.pressf.core.dto.events.product.ProductReservationCancelFailedEvent;
-import by.pressf.core.dto.events.product.ProductReservationCanceledEvent;
-import by.pressf.core.dto.events.product.ProductReservationFailedEvent;
-import by.pressf.core.dto.events.product.ProductReservedEvent;
+import by.pressf.core.dto.orchestration.commands.product.CancelProductReservationCommand;
+import by.pressf.core.dto.orchestration.commands.product.ReserveProductCommand;
+import by.pressf.core.dto.orchestration.events.product.ProductReservationCancelFailedEvent;
+import by.pressf.core.dto.orchestration.events.product.ProductReservationCanceledEvent;
+import by.pressf.core.dto.orchestration.events.product.ProductReservationFailedEvent;
+import by.pressf.core.dto.orchestration.events.product.ProductReservedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import by.pressf.productms.dao.entity.EventEntity;

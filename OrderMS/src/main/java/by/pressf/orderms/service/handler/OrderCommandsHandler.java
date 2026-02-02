@@ -1,11 +1,11 @@
 package by.pressf.orderms.service.handler;
 
-import by.pressf.core.dto.commands.order.ConfirmOrderCommand;
-import by.pressf.core.dto.commands.order.RejectOrderCommand;
-import by.pressf.core.dto.events.order.OrderCompletedEvent;
-import by.pressf.core.dto.events.order.OrderCompletionFailedEvent;
-import by.pressf.core.dto.events.order.OrderRejectedEvent;
-import by.pressf.core.dto.events.order.OrderRejectionFailedEvent;
+import by.pressf.core.dto.orchestration.commands.order.ConfirmOrderCommand;
+import by.pressf.core.dto.orchestration.commands.order.RejectOrderCommand;
+import by.pressf.core.dto.orchestration.events.order.OrderCompletedEvent;
+import by.pressf.core.dto.orchestration.events.order.OrderCompletionFailedEvent;
+import by.pressf.core.dto.orchestration.events.order.OrderRejectedEvent;
+import by.pressf.core.dto.orchestration.events.order.OrderRejectionFailedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.dao.entity.EventEntity;
 import by.pressf.orderms.dao.repository.EventRepository;

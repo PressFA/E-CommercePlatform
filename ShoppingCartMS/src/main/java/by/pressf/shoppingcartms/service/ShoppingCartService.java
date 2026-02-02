@@ -1,6 +1,6 @@
 package by.pressf.shoppingcartms.service;
 
-import by.pressf.core.dto.events.cart.CreateOrderShoppingCart;
+import by.pressf.core.dto.orchestration.events.cart.CreateOrderShoppingCart;
 import by.pressf.core.exceptions.AppError;
 import by.pressf.shoppingcartms.dao.entity.CartEntity;
 import by.pressf.shoppingcartms.dao.repository.ShoppingCartRepository;
