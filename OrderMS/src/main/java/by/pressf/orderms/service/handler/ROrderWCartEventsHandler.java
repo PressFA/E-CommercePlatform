@@ -19,8 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = "${shopping-cart.events.topic.name}", groupId = "order-ms")
-public class CartCheckoutListener {
+@KafkaListener(topics = "${r-order-w-cart.topic.name}", groupId = "order-ms")
+public class ROrderWCartEventsHandler {
     private final OrderService orderService;
     private final EventRepository eventRepository;
 
@@ -29,7 +29,7 @@ public class CartCheckoutListener {
     public void handle(@Payload CreateOrderShoppingCart event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The CreateOrderShoppingCart event from the cart-checkout-initiated topic has been received");
+            log.info("The CreateOrderShoppingCart event from the r-order-w-cart-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {

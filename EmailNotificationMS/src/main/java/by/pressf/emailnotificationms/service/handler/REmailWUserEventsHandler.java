@@ -1,6 +1,5 @@
 package by.pressf.emailnotificationms.service.handler;
 
-import by.pressf.core.dto.choreography.events.BalanceTopUpCompletedEvent;
 import by.pressf.core.dto.choreography.events.BalanceTopUpFailedEvent;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
@@ -22,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = "${user-email.events.topic.name}", groupId = "email-ms")
-public class UserEmailEventsHandler {
+@KafkaListener(topics = "${r-email-w-user.topic.name}", groupId = "email-ms")
+public class REmailWUserEventsHandler {
     private final EmailService emailService;
     private final EventRepository eventRepository;
 
@@ -32,21 +31,21 @@ public class UserEmailEventsHandler {
     public void handle(@Payload BalanceTopUpFailedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The BalanceTopUpFailedEvent event from the user-email-events topic has been received");
+            log.warn("The BalanceTopUpFailedEvent event from the r-email-w-user-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The BalanceTopUpFailedEvent message with messageId={} has already been processed", messageId);
+                log.warn("The BalanceTopUpFailedEvent message with messageId={} has already been processed", messageId);
                 return;
             }
 
             emailService.sendEmail(event.email(), event.subject(), event.body());
-            log.info("The email was successfully delivered to the post office {}", event.email());
+            log.warn("The email was successfully delivered to the post office {}", event.email());
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The BalanceTopUpFailedEvent message with messageId={} has been processed", messageId);
+            log.warn("The BalanceTopUpFailedEvent message with messageId={} has been processed", messageId);
         } catch (MailSendException e) {
             log.error(e.getMessage());
             throw new RetryableException(e);

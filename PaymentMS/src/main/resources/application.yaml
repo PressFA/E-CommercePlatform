@@ -12,4 +12,4 @@ spring:
       - classpath:kafka-topics.yaml # Topic's
 
 stripe:
-  api-key: sk_test_51IqIZvKf49AcVhILuIpJq1pGepPwUf4roFvpqLJmtPTBZrtYO0o16bThA1VYCpp7P9SWAvy3uEP71Cc38cvj3pLe00cauVQBCF
+  api-key: sk_test_BQokikJOvBiI2HlWgH4olfQ2

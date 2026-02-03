@@ -1,12 +1,4 @@
 payment:
-  events:
-    topic:
-      name: payment-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
   commands:
     topic:
       name: payment-commands
@@ -23,21 +15,60 @@ payment:
       insync:
         replicas: 1
 
-user-payment:
-  events:
-    topic:
-      name: user-payment-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
-email-payment:
-  events:
-    topic:
-      name: email-payment-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
+successful-events:
+  topic:
+    name: successful-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+errors-successful-events:
+  topic:
+    name: errors-successful-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+compensating-events:
+  topic:
+    name: compensating-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+errors-compensating-events:
+  topic:
+    name: errors-compensating-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+
+r-user-w-payment:
+  topic:
+    name: r-user-w-payment-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+r-payment-w-user:
+  topic:
+    name: r-payment-w-user-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+r-email-w-payment:
+  topic:
+    name: r-email-w-payment-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2

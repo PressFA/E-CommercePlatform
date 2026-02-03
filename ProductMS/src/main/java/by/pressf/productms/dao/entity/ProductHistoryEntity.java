@@ -15,7 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity @Table(name = "product_history")
 public class ProductHistoryEntity {
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
     @Column(name = "order_id", nullable = false)
     private UUID orderId;

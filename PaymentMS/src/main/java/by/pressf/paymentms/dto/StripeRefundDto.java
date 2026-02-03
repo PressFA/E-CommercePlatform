@@ -1,5 +1,5 @@
 package by.pressf.paymentms.dto;
 
-public record StripeRefundDto(String orderId,
+public record StripeRefundDto(String idempotencyKey,
                               String stripeId) {
 }

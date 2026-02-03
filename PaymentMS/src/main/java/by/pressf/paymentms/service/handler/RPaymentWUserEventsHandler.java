@@ -28,8 +28,8 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = "${user-payment.events.topic.name}", groupId = "payment-ms")
-public class UserPaymentEventsHandler {
+@KafkaListener(topics = "${r-payment-w-user.topic.name}", groupId = "payment-ms")
+public class RPaymentWUserEventsHandler {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final PaymentService paymentService;
@@ -40,7 +40,7 @@ public class UserPaymentEventsHandler {
     public void handle(@Payload UserBalanceCreditedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The UserBalanceCreditedEvent event from the user-payment-events topic has been received");
+            log.info("The UserBalanceCreditedEvent event from the r-payment-w-user-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
@@ -48,7 +48,7 @@ public class UserPaymentEventsHandler {
                 return;
             }
 
-            paymentService.topUpBalance(new UserBalanceRequest(event.userId(), event.amount()));
+            paymentService.topUpBalance(new UserBalanceRequest(messageId, event.userId(), event.amount()));
             log.info("The bank approved the transaction. Replenishment of the balance for the user with the ID {} was successful", event.userId());
 
             String bodyStr1 = "Hi there!\n";
@@ -61,14 +61,14 @@ public class UserPaymentEventsHandler {
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("email-payment.events.topic.name"),
+                            env.getRequiredProperty("r-email-w-payment.topic.name"),
                             event.userId().toString(),
                             newEvent
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The BalanceTopUpCompletedEvent message was sent to the email-payment-events topic");
+            log.info("The BalanceTopUpCompletedEvent message was sent to the r-email-w-payment-events topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
@@ -81,11 +81,11 @@ public class UserPaymentEventsHandler {
 
             switch (e.getStatusCode()) {
                 case 400, 401, 402, 403, 404 ->
-                        throw new RetryableException(e, env.getRequiredProperty("user-payment.events.topic.name"),
+                        throw new RetryableException(e, env.getRequiredProperty("r-user-w-payment.topic.name"),
                                 event.userId(), failedEvent);
                 default -> {
                     if (e.getStatusCode() == 0) log.error("Error on the part of our service");
-                    throw new NotRetryableException(e, env.getRequiredProperty("user-payment.events.topic.name"),
+                    throw new NotRetryableException(e, env.getRequiredProperty("r-user-w-payment.topic.name"),
                             event.userId(), failedEvent);
                 }
             }
@@ -94,7 +94,7 @@ public class UserPaymentEventsHandler {
 
             UserBalanceCreditFailedEvent failedEvent = createFailedEvent(event);
 
-            throw new NotRetryableException(e, env.getRequiredProperty("user-payment.events.topic.name"),
+            throw new NotRetryableException(e, env.getRequiredProperty("r-user-w-payment.topic.name"),
                     event.userId(), failedEvent);
         }
     }

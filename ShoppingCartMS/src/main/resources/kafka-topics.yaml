@@ -1,9 +1,8 @@
-shopping-cart:
-  events:
-    topic:
-      name: cart-checkout-initiated
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
+r-order-w-cart:
+  topic:
+    name: r-order-w-cart-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2

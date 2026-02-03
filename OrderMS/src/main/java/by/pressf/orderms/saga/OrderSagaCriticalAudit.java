@@ -30,12 +30,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = {
-        "${order.events.topic.name}",
-        "${product.events.topic.name}",
-        "${payment.events.topic.name}",
-        "${user.events.topic.name}"
-}, groupId = "saga-order")
+@KafkaListener(topics = "${errors-compensating-events.topic.name}", groupId = "order-audit-saga")
 public class OrderSagaCriticalAudit { // Здесь критические события, что компенсация в микросервисе не произошла
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -47,11 +42,11 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
     public void handle(@Payload OrderRejectionFailedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The OrderRejectionFailedEvent event from the order-events topic has been received");
+            log.error("The OrderRejectionFailedEvent event from the errors-compensating-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The OrderRejectionFailedEvent message with messageId={} has already been processed", messageId);
+                log.error("The OrderRejectionFailedEvent message with messageId={} has already been processed", messageId);
                 return;
             }
 
@@ -61,10 +56,13 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
             orderHistoryService.createFailLog(event.orderId(),
                     "OrderMS(Warning!!!): an error occurred while compensating for a transaction; for more information, see the logs.");
 
+
+            String bodyStr1 = "Hi there!\n";
+            String bodyStr2 = "An error occurred under the ID " + event.orderId() + " during the checkout process. Please try to place an order later.";
             SendEmailOrderCommand message = new SendEmailOrderCommand(
                     event.username(),
-                    "TEST subject: REJECT",
-                    "TEST body: REJECT",
+                    "Couldn't place an order!",
+                    bodyStr1 + bodyStr2,
                     event.orderId()
             );
 
@@ -77,12 +75,12 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The SendEmailOrderCommand message was sent to the email-notification-commands topic.");
+            log.error("The SendEmailOrderCommand message was sent to the email-notification-commands topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The OrderRejectionFailedEvent message with messageId={} has been processed", messageId);
+            log.error("The OrderRejectionFailedEvent message with messageId={} has been processed", messageId);
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -94,11 +92,11 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
     public void handle(@Payload ProductReservationCancelFailedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The ProductReservationCanceledEvent event from the product-events topic has been received");
+            log.error("The ProductReservationCanceledEvent event from the errors-compensating-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The ProductReservationCanceledEvent message with messageId={} has already been processed", messageId);
+                log.error("The ProductReservationCanceledEvent message with messageId={} has already been processed", messageId);
                 return;
             }
 
@@ -119,12 +117,12 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The RejectOrderCommand message was sent to the order-commands topic");
+            log.error("The RejectOrderCommand message was sent to the order-commands topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The ProductReservationCanceledEvent message with messageId={} has been processed", messageId);
+            log.error("The ProductReservationCanceledEvent message with messageId={} has been processed", messageId);
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -136,11 +134,11 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
     public void handle(@Payload PaymentRefundFailedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The PaymentRefundFailedEvent event from the payment-events topic has been received");
+            log.error("The PaymentRefundFailedEvent event from the errors-compensating-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The PaymentRefundFailedEvent message with messageId={} has already been processed", messageId);
+                log.error("The PaymentRefundFailedEvent message with messageId={} has already been processed", messageId);
                 return;
             }
 
@@ -161,12 +159,12 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The CancelProductReservationCommand message was sent to the product-commands topic");
+            log.error("The CancelProductReservationCommand message was sent to the product-commands topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The PaymentRefundFailedEvent message with messageId={} has been processed", messageId);
+            log.error("The PaymentRefundFailedEvent message with messageId={} has been processed", messageId);
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -178,11 +176,11 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
     public void handle(@Payload UserBalanceDebitCancelFailedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The UserBalanceDebitCancelFailedEvent event from the user-events topic has been received");
+            log.error("The UserBalanceDebitCancelFailedEvent event from the errors-compensating-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The UserBalanceDebitCancelFailedEvent message with messageId={} has already been processed", messageId);
+                log.error("The UserBalanceDebitCancelFailedEvent message with messageId={} has already been processed", messageId);
                 return;
             }
 
@@ -203,12 +201,12 @@ public class OrderSagaCriticalAudit { // Здесь критические со�
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The RefundPaymentCommand message was sent to the payment-commands topic");
+            log.error("The RefundPaymentCommand message was sent to the payment-commands topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The UserBalanceDebitCancelFailedEvent message with messageId={} has been processed", messageId);
+            log.error("The UserBalanceDebitCancelFailedEvent message with messageId={} has been processed", messageId);
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);

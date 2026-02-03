@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -24,7 +23,7 @@ public class PaymentService {
     public void createOrderPayment(CreateOrderPaymentRequest req) {
         try {
             log.info("Sending a payment to a bank gateway");
-            String stripeId = stripeService.createPayment(new StripeOrderPaymentDto(req.orderId().toString(), req.amount()));
+            String stripeId = stripeService.createPayment(new StripeOrderPaymentDto(req.idempotencyKey(), req.amount()));
             log.info("The payment sent to the bank gateway was successful");
 
             PaymentEntity payment = PaymentEntity.builder()
@@ -38,21 +37,22 @@ public class PaymentService {
 
             paymentRepository.save(payment);
         } catch (StripeException e) {
+            log.error(e.getMessage());
             throw new PaymentFailedException("A payment gateway error has occurred.", e.getStatusCode());
         }
     }
 
-    public void refundOrderPayment(UUID orderId) {
+    public void refundOrderPayment(RefundPaymentRequest req) {
         try {
-            PaymentEntity payment = paymentRepository.findByOrderId(orderId);
+            PaymentEntity payment = paymentRepository.findByOrderId(req.orderId());
 
             if (payment == null) {
-                throw new PaymentNotFoundByOrderIdException(orderId);
+                throw new PaymentNotFoundByOrderIdException(req.orderId());
             }
 
-            log.info("Sending a refund to the bank gateway");
-            String stripeId = stripeService.createRefundPayment(new StripeRefundDto(payment.getOrderId().toString(), payment.getStripeId()));
-            log.info("The refund sent to the bank gateway was successfully completed");
+            log.warn("Sending a refund to the bank gateway");
+            String stripeId = stripeService.createRefundPayment(new StripeRefundDto(req.idempotencyKey(), payment.getStripeId()));
+            log.warn("The refund sent to the bank gateway was successfully completed");
 
             PaymentEntity createPayment = PaymentEntity.builder()
                     .userId(payment.getUserId())
@@ -65,6 +65,7 @@ public class PaymentService {
 
             paymentRepository.save(createPayment);
         } catch (StripeException e) {
+            log.error(e.getMessage());
             throw new PaymentFailedException("A payment gateway error has occurred.", e.getStatusCode());
         }
     }
@@ -72,7 +73,7 @@ public class PaymentService {
     public void topUpBalance(UserBalanceRequest req) {
         try {
             log.info("Sending a balance top-up request to the bank gateway");
-            String stripeId = stripeService.createTopUpPayment(new StripeUserPaymentDto(req.userId(), req.amount()));
+            String stripeId = stripeService.createTopUpPayment(new StripeUserPaymentDto(req.idempotencyKey(), req.amount()));
             log.info("The balance top-up request to the bank gateway was successful");
 
             PaymentEntity payment = PaymentEntity.builder()
@@ -85,6 +86,7 @@ public class PaymentService {
 
             paymentRepository.save(payment);
         } catch (StripeException e) {
+            log.error(e.getMessage());
             throw new PaymentFailedException("A payment gateway error has occurred.", e.getStatusCode());
         }
     }

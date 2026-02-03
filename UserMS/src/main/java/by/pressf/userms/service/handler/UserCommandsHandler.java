@@ -65,14 +65,14 @@ public class UserCommandsHandler {
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("user.events.topic.name"),
+                            env.getRequiredProperty("successful-events.topic.name"),
                             command.orderId().toString(),
                             event
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The UserBalanceDebitedEvent message was sent to the user-events topic");
+            log.info("The UserBalanceDebitedEvent message was sent to the successful-events topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
@@ -83,14 +83,14 @@ public class UserCommandsHandler {
 
             UserBalanceDebitFailedEvent failedEvent = createDebitFailedEvent(command);
 
-            throw new RetryableException(e, env.getRequiredProperty("user.events.topic.name"),
+            throw new RetryableException(e, env.getRequiredProperty("errors-successful-events.topic.name"),
                     command.orderId(), failedEvent);
         } catch (UserNotFoundException | InsufficientBalanceException | DataAccessException e) {
             log.error(e.getMessage());
 
             UserBalanceDebitFailedEvent failedEvent = createDebitFailedEvent(command);
 
-            throw new NotRetryableException(e, env.getRequiredProperty("user.events.topic.name"),
+            throw new NotRetryableException(e, env.getRequiredProperty("errors-successful-events.topic.name"),
                     command.orderId(), failedEvent);
         }
     }
@@ -114,14 +114,14 @@ public class UserCommandsHandler {
             UserBalanceDebitCanceledEvent event = new UserBalanceDebitCanceledEvent(command.orderId(), command.username());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("user.events.topic.name"),
+                            env.getRequiredProperty("compensating-events.topic.name"),
                             command.orderId().toString(),
                             event
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The UserBalanceDebitCanceledEvent message was sent to the user-events topic");
+            log.info("The UserBalanceDebitCanceledEvent message was sent to the compensating-events topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
@@ -132,14 +132,14 @@ public class UserCommandsHandler {
 
             UserBalanceDebitCancelFailedEvent failedEvent = createCancelFailedEvent(command);
 
-            throw new RetryableException(e, env.getRequiredProperty("user.events.topic.name"),
+            throw new RetryableException(e, env.getRequiredProperty("errors-compensating-events.topic.name"),
                     command.orderId(), failedEvent);
         } catch (UserNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
 
             UserBalanceDebitCancelFailedEvent failedEvent = createCancelFailedEvent(command);
 
-            throw new NotRetryableException(e, env.getRequiredProperty("user.events.topic.name"),
+            throw new NotRetryableException(e, env.getRequiredProperty("errors-compensating-events.topic.name"),
                     command.orderId(), failedEvent);
         }
     }

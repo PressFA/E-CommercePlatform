@@ -28,18 +28,13 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.UUID;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = {
-        "${order.events.topic.name}",
-        "${product.events.topic.name}",
-        "${payment.events.topic.name}",
-        "${user.events.topic.name}",
-        "${email-notification.events.topic.name}"
-}, groupId = "saga-order")
+@KafkaListener(topics = "${successful-events.topic.name}", groupId = "order-forward-saga")
 public class OrderForwardSaga { // Здесь события, когда всё идёт идеально
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -51,7 +46,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
     public void handle(@Payload OrderCreatedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The OrderCreatedEvent event from the order-events topic has been received");
+            log.info("The OrderCreatedEvent event from the successful-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
@@ -96,7 +91,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
     public void handle(@Payload ProductReservedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The ProductReservedEvent event from the product-events topic has been received");
+            log.info("The ProductReservedEvent event from the successful-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
@@ -140,7 +135,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
     public void handle(@Payload PaymentChargedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The PaymentChargedEvent event from the payment-events topic has been received");
+            log.info("The PaymentChargedEvent event from the successful-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
@@ -184,7 +179,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
     public void handle(@Payload UserBalanceDebitedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The UserBalanceDebitedEvent event from the user-events topic has been received");
+            log.info("The UserBalanceDebitedEvent event from the successful-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
@@ -228,7 +223,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
     public void handle(@Payload OrderCompletedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The OrderCompletedEvent event from the order-events topic has been received");
+            log.info("The OrderCompletedEvent event from the successful-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
@@ -239,10 +234,13 @@ public class OrderForwardSaga { // Здесь события, когда всё 
             orderHistoryService.createSuccessLog(event.orderId(),
                     "OrderMS: The order status has been successfully changed to APPROVED");
 
+            String bodyStr1 = "Hi there!\n";
+            String bodyStr2 = "Your order under the ID " + event.orderId()
+                    + " has been successfully placed. Date of the order: "  + new Date();
             SendEmailOrderCommand message = new SendEmailOrderCommand(
                     event.username(),
-                    "TEST subject: APPROVE",
-                    "TEST body: APPROVE",
+                    "The order has been placed!",
+                    bodyStr1 + bodyStr2,
                     event.orderId()
             );
 
@@ -272,7 +270,7 @@ public class OrderForwardSaga { // Здесь события, когда всё 
     public void handle(@Payload EmailOrderSentEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The EmailOrderSentEvent event from the email-notification-events topic has been received");
+            log.info("The EmailOrderSentEvent event from the successful-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {

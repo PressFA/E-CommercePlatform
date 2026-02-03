@@ -55,14 +55,14 @@ public class OrderCommandsHandler {
             OrderCompletedEvent event = new OrderCompletedEvent(command.orderId(), command.username());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("order.events.topic.name"),
+                            env.getRequiredProperty("successful-events.topic.name"),
                             command.orderId().toString(),
                             event
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The OrderCompletedEvent message was sent to the order-events topic.");
+            log.info("The OrderCompletedEvent message was sent to the successful-events topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
@@ -78,7 +78,7 @@ public class OrderCommandsHandler {
                     command.amount()
             );
 
-            throw new NotRetryableException(e, env.getRequiredProperty("order.events.topic.name"),
+            throw new NotRetryableException(e, env.getRequiredProperty("errors-successful-events.topic.name"),
                     command.orderId(), failedEvent);
         }
     }
@@ -88,39 +88,39 @@ public class OrderCommandsHandler {
     public void handleCommand(@Payload RejectOrderCommand command,
                               @Header("messageId") String messageId) {
         try {
-            log.info("The RejectOrderCommand command from the order-commands topic has been received");
+            log.warn("The RejectOrderCommand command from the order-commands topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The RejectOrderCommand message with messageId={} has already been processed", messageId);
+                log.warn("The RejectOrderCommand message with messageId={} has already been processed", messageId);
                 return;
             }
 
             orderService.rejectOrder(command.orderId());
-            log.info("The order with ID {} has been rejected", command.orderId());
+            log.warn("The order with ID {} has been rejected", command.orderId());
 
             OrderRejectedEvent event = new OrderRejectedEvent(command.orderId(), command.username());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("order.events.topic.name"),
+                            env.getRequiredProperty("compensating-events.topic.name"),
                             command.orderId().toString(),
                             event
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The OrderRejectedEvent message was sent to the order-events topic.");
+            log.warn("The OrderRejectedEvent message was sent to the compensating-events topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The RejectOrderCommand message with messageId={} has been processed", messageId);
+            log.warn("The RejectOrderCommand message with messageId={} has been processed", messageId);
         } catch (OrderNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
 
             OrderRejectionFailedEvent failedEvent = new OrderRejectionFailedEvent(command.orderId(), command.username());
 
-            throw new NotRetryableException(e, env.getRequiredProperty("order.events.topic.name"),
+            throw new NotRetryableException(e, env.getRequiredProperty("errors-compensating-events.topic.name"),
                     command.orderId(), failedEvent);
         }
     }

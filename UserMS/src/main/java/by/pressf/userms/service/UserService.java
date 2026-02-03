@@ -57,14 +57,14 @@ public class UserService {
 
         ProducerRecord<String, Object> record =
                 new ProducerRecord<>(
-                        env.getRequiredProperty("user-payment.events.topic.name"),
+                        env.getRequiredProperty("r-payment-w-user.topic.name"),
                         event.userId().toString(),
                         event
                 );
         record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
         kafkaTemplate.send(record);
-        log.info("The UserBalanceCreditedEvent message was sent to the user-payment-events topic");
+        log.info("The UserBalanceCreditedEvent message was sent to the r-payment-w-user-events topic");
 
         return new UserBalanceResponse(user.getName(), user.getBalance());
     }

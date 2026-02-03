@@ -15,12 +15,12 @@ public class KafkaTopicConfig {
     private final Environment env;
 
     @Bean
-    NewTopic createCartCheckoutInitiatedTopic() {
-        return TopicBuilder.name(env.getRequiredProperty("shopping-cart.events.topic.name"))
-                .partitions(Integer.parseInt(env.getRequiredProperty("shopping-cart.events.topic.partitions")))
-                .replicas(Integer.parseInt(env.getRequiredProperty("shopping-cart.events.topic.replicas")))
+    NewTopic createROrderWCartEventsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("r-order-w-cart.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("r-order-w-cart.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("r-order-w-cart.topic.replicas")))
                 .configs(Map.of("min.insync.replicas",
-                        env.getRequiredProperty("shopping-cart.events.topic.min.insync.replicas")))
+                        env.getRequiredProperty("r-order-w-cart.topic.min.insync.replicas")))
                 .build();
     }
 }

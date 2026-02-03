@@ -93,14 +93,14 @@ public class ShoppingCartService {
 
         ProducerRecord<String, Object> record =
                 new ProducerRecord<>(
-                        env.getRequiredProperty("shopping-cart.events.topic.name"),
+                        env.getRequiredProperty("r-order-w-cart.topic.name"),
                         cart.getId().toString(),
                         event
                 );
         record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
         kafkaTemplate.send(record);
-        log.info("The CreateOrderShoppingCart message was sent to the cart-checkout-initiated topic.");
+        log.info("The CreateOrderShoppingCart message was sent to the r-order-w-cart-events topic.");
 
         shoppingCartRepository.delete(cart);
         log.info("Shopping cart item id: {} has been successfully deleted from database after order placement", id);

@@ -1,12 +1,4 @@
 email-notification:
-  events:
-    topic:
-      name: email-notification-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
   commands:
     topic:
       name: email-notification-commands
@@ -23,21 +15,36 @@ email-notification:
       insync:
         replicas: 1
 
-user-email:
-  events:
-    topic:
-      name: user-email-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
-email-payment:
-  events:
-    topic:
-      name: email-payment-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
+successful-events:
+  topic:
+    name: successful-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+errors-successful-events:
+  topic:
+    name: errors-successful-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+
+r-email-w-payment:
+  topic:
+    name: r-email-w-payment-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+r-email-w-user:
+  topic:
+    name: r-email-w-user-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2

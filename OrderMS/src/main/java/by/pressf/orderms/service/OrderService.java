@@ -45,14 +45,14 @@ public class OrderService {
 
         ProducerRecord<String, Object> record =
                 new ProducerRecord<>(
-                        env.getRequiredProperty("order.events.topic.name"),
+                        env.getRequiredProperty("successful-events.topic.name"),
                         event.orderId().toString(),
                         event
                 );
         record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
         kafkaTemplate.send(record);
-        log.info("The OrderCreatedEvent message was sent to the order-events topic.");
+        log.info("The OrderCreatedEvent message was sent to the successful-events topic.");
 
         return orderEntity.getId();
     }

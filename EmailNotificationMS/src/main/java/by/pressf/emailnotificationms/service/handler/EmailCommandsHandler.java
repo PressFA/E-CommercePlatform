@@ -54,14 +54,14 @@ public class EmailCommandsHandler {
             EmailOrderSentEvent event = new EmailOrderSentEvent(command.orderId());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("email-notification.events.topic.name"),
+                            env.getRequiredProperty("successful-events.topic.name"),
                             command.orderId().toString(),
                             event
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The EmailOrderSentEvent message was sent to the email-notification-events topic.");
+            log.info("The EmailOrderSentEvent message was sent to the successful-events topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
@@ -72,14 +72,14 @@ public class EmailCommandsHandler {
 
             EmailOrderNotSentEvent failedEvent = new EmailOrderNotSentEvent(command.orderId());
 
-            throw new RetryableException(e, env.getRequiredProperty("email-notification.events.topic.name"),
+            throw new RetryableException(e, env.getRequiredProperty("errors-successful-events.topic.name"),
                     command.orderId(), failedEvent);
         } catch (MailException | DataAccessException e) {
             log.error(e.getMessage());
 
             EmailOrderNotSentEvent failedEvent = new EmailOrderNotSentEvent(command.orderId());
 
-            throw new NotRetryableException(e, env.getRequiredProperty("email-notification.events.topic.name"),
+            throw new NotRetryableException(e, env.getRequiredProperty("errors-successful-events.topic.name"),
                     command.orderId(), failedEvent);
         }
     }

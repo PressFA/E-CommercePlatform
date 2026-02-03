@@ -1,12 +1,4 @@
 product:
-  events:
-    topic:
-      name: product-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
   commands:
     topic:
       name: product-commands
@@ -22,3 +14,36 @@ product:
     min:
       insync:
         replicas: 1
+
+successful-events:
+  topic:
+    name: successful-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+errors-successful-events:
+  topic:
+    name: errors-successful-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+compensating-events:
+  topic:
+    name: compensating-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+errors-compensating-events:
+  topic:
+    name: errors-compensating-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2

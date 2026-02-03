@@ -1,12 +1,4 @@
 order:
-  events:
-    topic:
-      name: order-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
   commands:
     topic:
       name: order-commands
@@ -22,16 +14,7 @@ order:
     min:
       insync:
         replicas: 1
-
 product:
-  events:
-    topic:
-      name: product-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
   commands:
     topic:
       name: product-commands
@@ -40,16 +23,7 @@ product:
       min:
         insync:
           replicas: 2
-
 payment:
-  events:
-    topic:
-      name: payment-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
   commands:
     topic:
       name: payment-commands
@@ -58,16 +32,7 @@ payment:
       min:
         insync:
           replicas: 2
-
 user:
-  events:
-    topic:
-      name: user-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
   commands:
     topic:
       name: user-commands
@@ -76,16 +41,7 @@ user:
       min:
         insync:
           replicas: 2
-
 email-notification:
-  events:
-    topic:
-      name: email-notification-events
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
   commands:
     topic:
       name: email-notification-commands
@@ -95,12 +51,44 @@ email-notification:
         insync:
           replicas: 2
 
-shopping-cart:
-  events:
-    topic:
-      name: cart-checkout-initiated
-      partitions: 3
-      replicas: 3
-      min:
-        insync:
-          replicas: 2
+successful-events:
+  topic:
+    name: successful-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+errors-successful-events:
+  topic:
+    name: errors-successful-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+compensating-events:
+  topic:
+    name: compensating-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+errors-compensating-events:
+  topic:
+    name: errors-compensating-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2
+
+r-order-w-cart:
+  topic:
+    name: r-order-w-cart-events
+    partitions: 3
+    replicas: 3
+    min:
+      insync:
+        replicas: 2

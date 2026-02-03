@@ -28,8 +28,8 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = "${user-payment.events.topic.name}", groupId = "user-ms")
-public class UserPaymentEventsHandler {
+@KafkaListener(topics = "${r-user-w-payment.topic.name}", groupId = "user-ms")
+public class RUserWPaymentEventsHandler {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private final UserService userService;
@@ -40,16 +40,16 @@ public class UserPaymentEventsHandler {
     public void handle(@Payload UserBalanceCreditFailedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The UserBalanceCreditFailedEvent event from the user-payment-events topic has been received");
+            log.warn("The UserBalanceCreditFailedEvent event from the r-user-w-payment-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The UserBalanceCreditFailedEvent message with messageId={} has already been processed", messageId);
+                log.warn("The UserBalanceCreditFailedEvent message with messageId={} has already been processed", messageId);
                 return;
             }
 
             userService.cancelTopUpUserBalance(new UserBalanceRequest(event.userId(), event.amount()));
-            log.error("Couldn't top up the user's balance with the {} ID: error on the part of the payment service", event.userId());
+            log.warn("Couldn't top up the user's balance with the {} ID: error on the part of the payment service", event.userId());
 
             String bodyStr1 = "Hi there!\n";
             String bodyStr2 = "Unfortunately, we couldn't process your payment of " + event.amount() + " due to a bank or provider error. Please try again in a few minutes.";
@@ -61,19 +61,19 @@ public class UserPaymentEventsHandler {
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("email-payment.events.topic.name"),
+                            env.getRequiredProperty("r-email-w-user.topic.name"),
                             event.userId().toString(),
                             newEvent
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The BalanceTopUpFailedEvent message was sent to the email-payment-events topic");
+            log.warn("The BalanceTopUpFailedEvent message was sent to the r-email-w-user-events topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The UserBalanceCreditFailedEvent message with messageId={} has been processed", messageId);
+            log.warn("The UserBalanceCreditFailedEvent message with messageId={} has been processed", messageId);
         } catch (OptimisticLockingFailureException e) {
             log.error(e.getMessage());
             throw new RetryableException(e);

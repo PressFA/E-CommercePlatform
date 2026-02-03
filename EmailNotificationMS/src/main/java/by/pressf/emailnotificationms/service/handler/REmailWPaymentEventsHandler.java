@@ -21,8 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = "${email-payment.events.topic.name}", groupId = "email-ms")
-public class EmailPaymentEventsHandler {
+@KafkaListener(topics = "${r-email-w-payment.topic.name}", groupId = "email-ms")
+public class REmailWPaymentEventsHandler {
     private final EmailService emailService;
     private final EventRepository eventRepository;
 
@@ -31,7 +31,7 @@ public class EmailPaymentEventsHandler {
     public void handle(@Payload BalanceTopUpCompletedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The BalanceTopUpCompletedEvent event from the email-payment-events topic has been received");
+            log.info("The BalanceTopUpCompletedEvent event from the r-email-w-payment-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {

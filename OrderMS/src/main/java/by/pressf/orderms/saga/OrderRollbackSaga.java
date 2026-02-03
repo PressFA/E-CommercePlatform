@@ -30,12 +30,7 @@ import java.util.UUID;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@KafkaListener(topics = {
-        "${order.events.topic.name}",
-        "${product.events.topic.name}",
-        "${payment.events.topic.name}",
-        "${user.events.topic.name}"
-}, groupId = "saga-order")
+@KafkaListener(topics = "${compensating-events.topic.name}", groupId = "order-rollback-saga")
 public class OrderRollbackSaga { // Здесь события на продолжение отката
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
@@ -47,21 +42,23 @@ public class OrderRollbackSaga { // Здесь события на продол�
     public void handle(@Payload OrderRejectedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The OrderRejectedEvent event from the order-events topic has been received");
+            log.warn("The OrderRejectedEvent event from the compensating-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The OrderRejectedEvent message with messageId={} has already been processed", messageId);
+                log.warn("The OrderRejectedEvent message with messageId={} has already been processed", messageId);
                 return;
             }
 
             orderHistoryService.createSuccessLog(event.orderId(),
                     "OrderMS: the order status has been successfully changed to REJECTED");
 
+            String bodyStr1 = "Hi there!\n";
+            String bodyStr2 = "An error occurred under the ID " + event.orderId() + " during the checkout process. Please try to place an order later.";
             SendEmailOrderCommand message = new SendEmailOrderCommand(
                     event.username(),
-                    "TEST subject: REJECT",
-                    "TEST body: REJECT",
+                    "Couldn't place an order!",
+                    bodyStr1 + bodyStr2,
                     event.orderId()
             );
 
@@ -74,12 +71,12 @@ public class OrderRollbackSaga { // Здесь события на продол�
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The SendEmailOrderCommand message was sent to the email-notification-commands topic.");
+            log.warn("The SendEmailOrderCommand message was sent to the email-notification-commands topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The OrderRejectedEvent message with messageId={} has been processed", messageId);
+            log.warn("The OrderRejectedEvent message with messageId={} has been processed", messageId);
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -91,11 +88,11 @@ public class OrderRollbackSaga { // Здесь события на продол�
     public void handle(@Payload ProductReservationCanceledEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The ProductReservationCanceledEvent event from the product-events topic has been received");
+            log.warn("The ProductReservationCanceledEvent event from the compensating-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The ProductReservationCanceledEvent message with messageId={} has already been processed", messageId);
+                log.warn("The ProductReservationCanceledEvent message with messageId={} has already been processed", messageId);
                 return;
             }
 
@@ -113,12 +110,12 @@ public class OrderRollbackSaga { // Здесь события на продол�
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The RejectOrderCommand message was sent to the order-commands topic");
+            log.warn("The RejectOrderCommand message was sent to the order-commands topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The ProductReservationCanceledEvent message with messageId={} has been processed", messageId);
+            log.warn("The ProductReservationCanceledEvent message with messageId={} has been processed", messageId);
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -130,11 +127,11 @@ public class OrderRollbackSaga { // Здесь события на продол�
     public void handle(@Payload PaymentRefundedEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The PaymentRefundedEvent event from the payment-events topic has been received");
+            log.warn("The PaymentRefundedEvent event from the compensating-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The PaymentRefundedEvent message with messageId={} has already been processed", messageId);
+                log.warn("The PaymentRefundedEvent message with messageId={} has already been processed", messageId);
                 return;
             }
 
@@ -152,12 +149,12 @@ public class OrderRollbackSaga { // Здесь события на продол�
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The CancelProductReservationCommand message was sent to the product-commands topic");
+            log.warn("The CancelProductReservationCommand message was sent to the product-commands topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The PaymentRefundedEvent message with messageId={} has been processed", messageId);
+            log.warn("The PaymentRefundedEvent message with messageId={} has been processed", messageId);
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -169,11 +166,11 @@ public class OrderRollbackSaga { // Здесь события на продол�
     public void handle(@Payload UserBalanceDebitCanceledEvent event,
                        @Header("messageId") String messageId) {
         try {
-            log.info("The UserBalanceDebitCanceledEvent event from the user-events topic has been received");
+            log.warn("The UserBalanceDebitCanceledEvent event from the compensating-events topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The UserBalanceDebitCanceledEvent message with messageId={} has already been processed", messageId);
+                log.warn("The UserBalanceDebitCanceledEvent message with messageId={} has already been processed", messageId);
                 return;
             }
 
@@ -191,12 +188,12 @@ public class OrderRollbackSaga { // Здесь события на продол�
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The RefundPaymentCommand message was sent to the payment-commands topic");
+            log.warn("The RefundPaymentCommand message was sent to the payment-commands topic");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The UserBalanceDebitCanceledEvent message with messageId={} has been processed", messageId);
+            log.warn("The UserBalanceDebitCanceledEvent message with messageId={} has been processed", messageId);
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);

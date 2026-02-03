@@ -15,16 +15,6 @@ public class KafkaTopicConfig {
     private final Environment env;
 
     @Bean
-    NewTopic createUserEventsTopic() {
-        return TopicBuilder.name(env.getRequiredProperty("user.events.topic.name"))
-                .partitions(Integer.parseInt(env.getRequiredProperty("user.events.topic.partitions")))
-                .replicas(Integer.parseInt(env.getRequiredProperty("user.events.topic.replicas")))
-                .configs(Map.of("min.insync.replicas",
-                        env.getRequiredProperty("user.events.topic.min.insync.replicas")))
-                .build();
-    }
-
-    @Bean
     NewTopic createUserCommandsTopic() {
         return TopicBuilder.name(env.getRequiredProperty("user.commands.topic.name"))
                 .partitions(Integer.parseInt(env.getRequiredProperty("user.commands.topic.partitions")))
@@ -45,22 +35,72 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    NewTopic createUserPaymentEventsTopic() {
-        return TopicBuilder.name(env.getRequiredProperty("user-payment.events.topic.name"))
-                .partitions(Integer.parseInt(env.getRequiredProperty("user-payment.events.topic.partitions")))
-                .replicas(Integer.parseInt(env.getRequiredProperty("user-payment.events.topic.replicas")))
+    NewTopic createSuccessfulEventsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("successful-events.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("successful-events.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("successful-events.topic.replicas")))
                 .configs(Map.of("min.insync.replicas",
-                        env.getRequiredProperty("user-payment.events.topic.min.insync.replicas")))
+                        env.getRequiredProperty("successful-events.topic.min.insync.replicas")))
                 .build();
     }
 
     @Bean
-    NewTopic createUserEmailEventsTopic() {
-        return TopicBuilder.name(env.getRequiredProperty("user-email.events.topic.name"))
-                .partitions(Integer.parseInt(env.getRequiredProperty("user-email.events.topic.partitions")))
-                .replicas(Integer.parseInt(env.getRequiredProperty("user-email.events.topic.replicas")))
+    NewTopic createErrorsSuccessfulEventsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("errors-successful-events.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("errors-successful-events.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("errors-successful-events.topic.replicas")))
                 .configs(Map.of("min.insync.replicas",
-                        env.getRequiredProperty("user-email.events.topic.min.insync.replicas")))
+                        env.getRequiredProperty("errors-successful-events.topic.min.insync.replicas")))
+                .build();
+    }
+
+    @Bean
+    NewTopic createCompensatingEventsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("compensating-events.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("compensating-events.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("compensating-events.topic.replicas")))
+                .configs(Map.of("min.insync.replicas",
+                        env.getRequiredProperty("compensating-events.topic.min.insync.replicas")))
+                .build();
+    }
+
+    @Bean
+    NewTopic createErrorsCompensatingEventsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("errors-compensating-events.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("errors-compensating-events.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("errors-compensating-events.topic.replicas")))
+                .configs(Map.of("min.insync.replicas",
+                        env.getRequiredProperty("errors-compensating-events.topic.min.insync.replicas")))
+                .build();
+    }
+
+    @Bean
+    NewTopic createRUserWPaymentEventsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("r-user-w-payment.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("r-user-w-payment.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("r-user-w-payment.topic.replicas")))
+                .configs(Map.of("min.insync.replicas",
+                        env.getRequiredProperty("r-user-w-payment.topic.min.insync.replicas")))
+                .build();
+    }
+
+    @Bean
+    NewTopic createRPaymentWUserEventsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("r-payment-w-user.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("r-payment-w-user.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("r-payment-w-user.topic.replicas")))
+                .configs(Map.of("min.insync.replicas",
+                        env.getRequiredProperty("r-payment-w-user.topic.min.insync.replicas")))
+                .build();
+    }
+
+    @Bean
+    NewTopic createREmailWUserEventsTopic() {
+        return TopicBuilder.name(env.getRequiredProperty("r-email-w-user.topic.name"))
+                .partitions(Integer.parseInt(env.getRequiredProperty("r-email-w-user.topic.partitions")))
+                .replicas(Integer.parseInt(env.getRequiredProperty("r-email-w-user.topic.replicas")))
+                .configs(Map.of("min.insync.replicas",
+                        env.getRequiredProperty("r-email-w-user.topic.min.insync.replicas")))
                 .build();
     }
 }

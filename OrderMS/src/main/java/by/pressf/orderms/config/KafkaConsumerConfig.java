@@ -1,6 +1,5 @@
 package by.pressf.orderms.config;
 
-import by.pressf.core.exceptions.EventException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import lombok.RequiredArgsConstructor;
@@ -75,13 +74,14 @@ public class KafkaConsumerConfig {
     логику обработки сообщения перед публикацией в dead letter topic (DLT)
     */
     @Bean
-    DeadLetterPublishingRecoverer recoverer(KafkaTemplate<String, Object> kafkaTemplateDlt) {
+    DeadLetterPublishingRecoverer recoverer(KafkaTemplate<String, Object> kafkaTemplateDlt,
+                                            KafkaTemplate<String, Object> kafkaTemplate) {
         return new DeadLetterPublishingRecoverer(
                 kafkaTemplateDlt,
                 (consumerRecord, ex) -> {
                     Throwable cause = ex.getCause();
 
-                    if (cause instanceof EventException e && e.getValue() != null) {
+                    if (cause instanceof NotRetryableException e && e.getValue() != null) {
                         ProducerRecord<String, Object> record =
                                 new ProducerRecord<>(
                                         e.getTopicName(),
@@ -90,18 +90,16 @@ public class KafkaConsumerConfig {
                                 );
                         record.headers().add("messageId", e.getMessageId().getBytes());
 
-                        kafkaTemplateDlt.send(record)
-                                .whenComplete((result, exeption) -> {
-                                    if (exeption != null) {
-                                        log.error("The message {} was not delivered to {} topic",
-                                                e.getValue().getClass().getSimpleName(),
-                                                e.getTopicName());
-                                    } else {
-                                        log.info("Message {} successfully delivered to {} topic",
-                                                e.getValue().getClass().getSimpleName(),
-                                                e.getTopicName());
-                                    }
-                                });
+                        try {
+                            kafkaTemplate.send(record).get();
+                            log.info("Message {} successfully delivered to {} topic",
+                                    e.getValue().getClass().getSimpleName(),
+                                    e.getTopicName());
+                        } catch (Throwable sendEx) {
+                            log.error("The message {} was not delivered to {} topic",
+                                    e.getValue().getClass().getSimpleName(),
+                                    e.getTopicName());
+                        }
                     }
 
                     log.info("The message {} has been sent to {} topic",

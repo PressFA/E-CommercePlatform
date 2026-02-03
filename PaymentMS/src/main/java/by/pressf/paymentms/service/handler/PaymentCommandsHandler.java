@@ -11,6 +11,7 @@ import by.pressf.core.exceptions.RetryableException;
 import by.pressf.paymentms.dao.entity.EventEntity;
 import by.pressf.paymentms.dao.repository.EventRepository;
 import by.pressf.paymentms.dto.CreateOrderPaymentRequest;
+import by.pressf.paymentms.dto.RefundPaymentRequest;
 import by.pressf.paymentms.exception.PaymentFailedException;
 import by.pressf.paymentms.exception.PaymentNotFoundByOrderIdException;
 import by.pressf.paymentms.service.PaymentService;
@@ -53,6 +54,7 @@ public class PaymentCommandsHandler {
             }
 
             CreateOrderPaymentRequest request = new CreateOrderPaymentRequest(
+                    messageId,
                     command.orderId(),
                     command.userId(),
                     command.amount()
@@ -70,14 +72,14 @@ public class PaymentCommandsHandler {
 
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("payment.events.topic.name"),
+                            env.getRequiredProperty("successful-events.topic.name"),
                             command.orderId().toString(),
                             event
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The PaymentChargedEvent message was sent to the payment-events topic.");
+            log.info("The PaymentChargedEvent message was sent to the successful-events topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
@@ -88,13 +90,14 @@ public class PaymentCommandsHandler {
 
             PaymentChargeFailedEvent failedEvent = createChargeFailedEvent(command);
 
-            throw handleStripeException(e, command.orderId(), failedEvent);
+            throw handleStripeException(e, env.getRequiredProperty("errors-successful-events.topic.name"),
+                    command.orderId(), failedEvent);
         } catch (PaymentNotFoundByOrderIdException | DataAccessException e) {
             log.error(e.getMessage());
 
             PaymentChargeFailedEvent failedEvent = createChargeFailedEvent(command);
 
-            throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+            throw new NotRetryableException(e, env.getRequiredProperty("errors-successful-events.topic.name"),
                     command.orderId(), failedEvent);
         }
     }
@@ -104,52 +107,53 @@ public class PaymentCommandsHandler {
     public void handleCommand(@Payload RefundPaymentCommand command,
                               @Header("messageId") String messageId) {
         try {
-            log.info("The RefundPaymentCommand command from the payment-commands topic has been received");
+            log.warn("The RefundPaymentCommand command from the payment-commands topic has been received");
 
             EventEntity processedEvent = eventRepository.findByMessageId(messageId);
             if (processedEvent != null) {
-                log.info("The RefundPaymentCommand message with messageId={} has already been processed", messageId);
+                log.warn("The RefundPaymentCommand message with messageId={} has already been processed", messageId);
                 return;
             }
 
-            paymentService.refundOrderPayment(command.orderId());
-            log.info("The refund for order ID {} has been successfully processed", command.orderId());
+            RefundPaymentRequest refundPaymentRequest = new RefundPaymentRequest(messageId, command.orderId());
+
+            paymentService.refundOrderPayment(refundPaymentRequest);
+            log.warn("The refund for order ID {} has been successfully processed", command.orderId());
 
             PaymentRefundedEvent event = new PaymentRefundedEvent(command.orderId(), command.username());
             ProducerRecord<String, Object> record =
                     new ProducerRecord<>(
-                            env.getRequiredProperty("payment.events.topic.name"),
+                            env.getRequiredProperty("compensating-events.topic.name"),
                             command.orderId().toString(),
                             event
                     );
             record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
 
             kafkaTemplate.send(record);
-            log.info("The PaymentRefundedEvent message was sent to the payment-events topic.");
+            log.warn("The PaymentRefundedEvent message was sent to the compensating-events topic.");
 
             eventRepository.save(EventEntity.builder()
                     .messageId(messageId)
                     .build());
-            log.info("The RefundPaymentCommand message with messageId={} has been processed", messageId);
+            log.warn("The RefundPaymentCommand message with messageId={} has been processed", messageId);
         } catch (PaymentFailedException e) {
             log.error(e.getMessage());
 
             PaymentRefundFailedEvent failedEvent = createRefundFailedEvent(command);
 
-            throw handleStripeException(e, command.orderId(), failedEvent);
+            throw handleStripeException(e, env.getRequiredProperty("errors-compensating-events.topic.name"),
+                    command.orderId(), failedEvent);
         } catch (PaymentNotFoundByOrderIdException | DataAccessException e) {
             log.error(e.getMessage());
 
             PaymentRefundFailedEvent failedEvent = createRefundFailedEvent(command);
 
-            throw new NotRetryableException(e, env.getRequiredProperty("payment.events.topic.name"),
+            throw new NotRetryableException(e, env.getRequiredProperty("errors-compensating-events.topic.name"),
                     command.orderId(), failedEvent);
         }
     }
 
-    private <T> RuntimeException handleStripeException(PaymentFailedException e, UUID orderId, T failedEvent) {
-        String topic = env.getRequiredProperty("payment.events.topic.name");
-
+    private <T> RuntimeException handleStripeException(PaymentFailedException e, String topic, UUID orderId, T failedEvent) {
         RuntimeException returnEx;
         switch (e.getStatusCode()) {
             case 400, 401, 402, 403, 404 ->
