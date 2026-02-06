@@ -8,7 +8,9 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/PaymentMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/PaymentMS.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ProductMs.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ProductMs.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ShoppingCartMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ShoppingCartMS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ShoppingCartMS.test.iml" filepath="$PROJECT_DIR$/.idea/modules/ShoppingCartMS.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/UserMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/UserMS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/UserMS.test.iml" filepath="$PROJECT_DIR$/.idea/modules/UserMS.test.iml" />
     </modules>
   </component>
 </project>

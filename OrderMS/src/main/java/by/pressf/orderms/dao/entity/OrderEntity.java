@@ -16,13 +16,13 @@ import java.util.UUID;
 public class OrderEntity {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = false, updatable = false)
     private UUID userId;
-    @Column(name = "product_id", nullable = false)
+    @Column(name = "product_id", nullable = false, updatable = false)
     private UUID productId;
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private Integer quantity;
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 12)
     private OrderStatus status;
 }

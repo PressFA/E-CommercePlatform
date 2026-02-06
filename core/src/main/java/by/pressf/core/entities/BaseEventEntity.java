@@ -15,6 +15,6 @@ import lombok.experimental.SuperBuilder;
 public abstract class BaseEventEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name = "message_id", nullable = false, unique = true)
+    @Column(name = "message_id", nullable = false, unique = true, updatable = false, length = 40)
     private String messageId;
 }

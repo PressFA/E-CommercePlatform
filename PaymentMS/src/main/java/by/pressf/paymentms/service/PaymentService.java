@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,7 +29,6 @@ public class PaymentService {
                     .orderId(req.orderId())
                     .stripeId(stripeId)
                     .amount(req.amount())
-                    .createdAt(LocalDateTime.now())
                     .type(PaymentType.PAYMENT)
                     .build();
 
@@ -59,7 +56,6 @@ public class PaymentService {
                     .orderId(payment.getOrderId())
                     .stripeId(stripeId)
                     .amount(payment.getAmount())
-                    .createdAt(LocalDateTime.now())
                     .type(PaymentType.REFUND)
                     .build();
 
@@ -80,7 +76,6 @@ public class PaymentService {
                     .userId(req.userId())
                     .stripeId(stripeId)
                     .amount(req.amount())
-                    .createdAt(LocalDateTime.now())
                     .type(PaymentType.TOP_UP)
                     .build();
 

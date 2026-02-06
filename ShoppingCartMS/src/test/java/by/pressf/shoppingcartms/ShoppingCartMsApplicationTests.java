@@ -9,5 +9,4 @@ class ShoppingCartMsApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }

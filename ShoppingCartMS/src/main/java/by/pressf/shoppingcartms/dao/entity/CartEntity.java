@@ -15,9 +15,9 @@ import java.util.UUID;
 public class CartEntity {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = false, updatable = false)
     private UUID userId;
-    @Column(name = "product_id", nullable = false)
+    @Column(name = "product_id", nullable = false, updatable = false)
     private UUID productId;
     @Column(nullable = false)
     private Integer quantity;

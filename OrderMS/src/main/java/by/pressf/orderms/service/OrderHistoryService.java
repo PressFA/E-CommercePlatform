@@ -18,7 +18,6 @@ public class OrderHistoryService {
         OrderHistoryEntity entity = OrderHistoryEntity.builder()
                 .orderId(orderId)
                 .status(OrderHistoryStatus.SUCCESS)
-                .createdAt(LocalDateTime.now())
                 .reason(reason)
                 .build();
 
@@ -29,7 +28,6 @@ public class OrderHistoryService {
         OrderHistoryEntity entity = OrderHistoryEntity.builder()
                 .orderId(orderId)
                 .status(OrderHistoryStatus.FAIL)
-                .createdAt(LocalDateTime.now())
                 .reason(reason)
                 .build();
 
