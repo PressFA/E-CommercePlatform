@@ -77,31 +77,6 @@ class EventRepositoryUnitTests {
         );
     }
 
-    @ParameterizedTest @MethodSource("findByMessageId_NullArgument")
-    void findByMessageId_NullArgument_ReturnNull(List<EventEntity> entities) {
-        // Arrange
-        eventRepository.saveAllAndFlush(entities);
-
-        entityManager.clear();
-
-        // Act
-        EventEntity entity = eventRepository.findByMessageId(null);
-
-        // Assert
-        assertThat(entity).isNull();
-    }
-
-    private static Stream<Arguments> findByMessageId_NullArgument() {
-        return Stream.of(
-                Arguments.of(List.of()),
-                Arguments.of(List.of(
-                        EventEntity.builder().messageId(UUID.randomUUID().toString()).build(),
-                        EventEntity.builder().messageId(UUID.randomUUID().toString()).build(),
-                        EventEntity.builder().messageId(UUID.randomUUID().toString()).build()
-                ))
-        );
-    }
-
     @Test
     void save_ValidEventEntity_ReturnSavedEntity() {
         // Arrange

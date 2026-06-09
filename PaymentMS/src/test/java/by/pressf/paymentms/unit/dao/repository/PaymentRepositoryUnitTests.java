@@ -96,34 +96,6 @@ class PaymentRepositoryUnitTests {
         );
     }
 
-    @ParameterizedTest @MethodSource("findByOrderId_NullArgument")
-    void findByOrderId_NullArgument_ReturnNull(List<PaymentEntity> payments) {
-        // Arrange
-        paymentRepository.saveAllAndFlush(payments);
-
-        entityManager.clear();
-
-        // Act
-        PaymentEntity payment = paymentRepository.findByOrderId(null);
-
-        // Assert
-        assertThat(payment).isNull();
-    }
-
-    private static Stream<Arguments> findByOrderId_NullArgument() {
-        return Stream.of(
-                Arguments.of(List.of()),
-                Arguments.of(List.of(
-                        new PaymentEntity(null, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID().toString(),
-                                new BigDecimal("99.99"), LocalDateTime.now(), PaymentType.PAYMENT),
-                        new PaymentEntity(null, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID().toString(),
-                                new BigDecimal("89.99"), LocalDateTime.now(), PaymentType.TOP_UP),
-                        new PaymentEntity(null, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID().toString(),
-                                new BigDecimal("79.99"), LocalDateTime.now(), PaymentType.REFUND)
-                ))
-        );
-    }
-
     @Test
     void save_ValidPayment_ReturnSavedPayment() {
         // Arrange

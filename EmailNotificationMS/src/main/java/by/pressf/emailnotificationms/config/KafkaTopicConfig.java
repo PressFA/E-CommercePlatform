@@ -35,26 +35,6 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    NewTopic createSuccessfulEventsTopic() {
-        return TopicBuilder.name(env.getRequiredProperty("successful-events.topic.name"))
-                .partitions(Integer.parseInt(env.getRequiredProperty("successful-events.topic.partitions")))
-                .replicas(Integer.parseInt(env.getRequiredProperty("successful-events.topic.replicas")))
-                .configs(Map.of("min.insync.replicas",
-                        env.getRequiredProperty("successful-events.topic.min.insync.replicas")))
-                .build();
-    }
-
-    @Bean
-    NewTopic createErrorsSuccessfulEventsTopic() {
-        return TopicBuilder.name(env.getRequiredProperty("errors-successful-events.topic.name"))
-                .partitions(Integer.parseInt(env.getRequiredProperty("errors-successful-events.topic.partitions")))
-                .replicas(Integer.parseInt(env.getRequiredProperty("errors-successful-events.topic.replicas")))
-                .configs(Map.of("min.insync.replicas",
-                        env.getRequiredProperty("errors-successful-events.topic.min.insync.replicas")))
-                .build();
-    }
-
-    @Bean
     NewTopic createREmailWPaymentEventsTopic() {
         return TopicBuilder.name(env.getRequiredProperty("r-email-w-payment.topic.name"))
                 .partitions(Integer.parseInt(env.getRequiredProperty("r-email-w-payment.topic.partitions")))

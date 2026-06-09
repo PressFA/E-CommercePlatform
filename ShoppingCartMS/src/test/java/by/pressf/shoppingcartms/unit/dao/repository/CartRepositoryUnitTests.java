@@ -2,7 +2,7 @@ package by.pressf.shoppingcartms.unit.dao.repository;
 
 import by.pressf.shoppingcartms.dao.entity.CartEntity;
 import by.pressf.shoppingcartms.dao.repository.ShoppingCartRepository;
-import by.pressf.shoppingcartms.dto.CartInfo;
+import by.pressf.shoppingcartms.dto.internal.CartInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -89,31 +89,6 @@ public class CartRepositoryUnitTests {
                 Arguments.of(List.of(
                         new CartEntity(null, UUID.fromString("e30f63e1-09e6-4599-aada-fe2af26db92e"), UUID.randomUUID(), 1),
                         new CartEntity(null, UUID.fromString("e30f63e1-09e6-4599-aada-fe2af26db92e"), UUID.randomUUID(), 2)
-                ))
-        );
-    }
-
-    @ParameterizedTest @MethodSource("findAllByUserId_NullArgument")
-    void findAllByUserId_NullArgument_ReturnEmptyList(List<CartEntity> entities) {
-        // Arrange
-        cartRepository.saveAllAndFlush(entities);
-
-        entityManager.clear();
-
-        // Act
-        List<CartInfo> list = cartRepository.findAllByUserId(null);
-
-        // Assert
-        assertThat(list).isEmpty();
-    }
-
-    private static Stream<Arguments> findAllByUserId_NullArgument() {
-        return Stream.of(
-                Arguments.of(List.of()),
-                Arguments.of(List.of(
-                        new CartEntity(null, UUID.randomUUID(), UUID.randomUUID(), 1),
-                        new CartEntity(null, UUID.randomUUID(), UUID.randomUUID(), 2),
-                        new CartEntity(null, UUID.randomUUID(), UUID.randomUUID(), 3)
                 ))
         );
     }

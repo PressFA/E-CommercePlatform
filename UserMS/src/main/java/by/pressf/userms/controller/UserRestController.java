@@ -1,6 +1,10 @@
 package by.pressf.userms.controller;
 
-import by.pressf.userms.dto.*;
+import by.pressf.userms.dto.incoming.CreateUserRequest;
+import by.pressf.userms.dto.incoming.TopUpBalanceRequest;
+import by.pressf.userms.dto.internal.UserBalanceRequest;
+import by.pressf.userms.dto.internal.UserBalanceResponse;
+import by.pressf.userms.dto.internal.UserCreationData;
 import by.pressf.userms.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -5,12 +5,3 @@ spring:
       isolation-level: read_committed
       properties:
         spring.json.trusted.packages: by.pressf.core.*
-
-payment:
-  commands:
-    topic:
-      name: payment-commands
-dead:
-  letter:
-    topic:
-      name: payment-ms-dlt

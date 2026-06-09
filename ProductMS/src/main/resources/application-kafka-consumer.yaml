@@ -5,16 +5,3 @@ spring:
       isolation-level: read_committed
       properties:
         spring.json.trusted.packages: by.pressf.core.*
-
-order:
-  commands:
-    topic:
-      name: order-commands
-product:
-  commands:
-    topic:
-      name: product-commands
-dead:
-  letter:
-    topic:
-      name: product-ms-dlt

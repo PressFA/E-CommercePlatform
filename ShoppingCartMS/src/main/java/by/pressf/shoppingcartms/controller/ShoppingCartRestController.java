@@ -1,9 +1,9 @@
 package by.pressf.shoppingcartms.controller;
 
-import by.pressf.shoppingcartms.dto.BuyProductRequest;
-import by.pressf.shoppingcartms.dto.CartInfo;
-import by.pressf.shoppingcartms.dto.CreateCartRequest;
-import by.pressf.shoppingcartms.dto.QuantityChangeCart;
+import by.pressf.shoppingcartms.dto.incoming.BuyProductRequest;
+import by.pressf.shoppingcartms.dto.internal.CartInfo;
+import by.pressf.shoppingcartms.dto.incoming.CreateCartRequest;
+import by.pressf.shoppingcartms.dto.incoming.QuantityChangeCart;
 import by.pressf.shoppingcartms.service.ShoppingCartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +36,6 @@ public class ShoppingCartRestController {
         log.info("Received request to add item to cart for userId: {}, productId: {}",
                 cartRequest.userId(), cartRequest.productId());
         CartInfo cartInfo = shoppingCartService.createCart(cartRequest);
-
         log.info("Successfully created cart item with id: {}", cartInfo.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(cartInfo);
     }
@@ -44,7 +43,7 @@ public class ShoppingCartRestController {
     @PostMapping("/buy")
     public ResponseEntity<?> placeOrder(@RequestBody @Valid BuyProductRequest req) {
         log.info("Received request to place order from shopping cart item id: {}", req.id());
-        shoppingCartService.createOrderFromShoppingCart(req.id(), req.username());
+        shoppingCartService.createOrderFromShoppingCart(req);
 
         log.info("Successfully processed checkout for cart item id: {}", req.id());
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

@@ -4,9 +4,13 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/E-CommercePlatform.iml" filepath="$PROJECT_DIR$/E-CommercePlatform.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/EmailNotificationMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/EmailNotificationMS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/EmailNotificationMS.test.iml" filepath="$PROJECT_DIR$/.idea/modules/EmailNotificationMS.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/OrderMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/OrderMS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/OrderMS.test.iml" filepath="$PROJECT_DIR$/.idea/modules/OrderMS.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/PaymentMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/PaymentMS.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ProductMs.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ProductMs.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/PaymentMS.test.iml" filepath="$PROJECT_DIR$/.idea/modules/PaymentMS.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ProductMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ProductMS.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ProductMS.test.iml" filepath="$PROJECT_DIR$/.idea/modules/ProductMS.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ShoppingCartMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ShoppingCartMS.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ShoppingCartMS.test.iml" filepath="$PROJECT_DIR$/.idea/modules/ShoppingCartMS.test.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/UserMS.main.iml" filepath="$PROJECT_DIR$/.idea/modules/UserMS.main.iml" />

@@ -1,6 +1,10 @@
 package by.pressf.productms.controller;
 
-import by.pressf.productms.dto.*;
+import by.pressf.productms.dto.incoming.CreateProductRequest;
+import by.pressf.productms.dto.incoming.PatchProductRequest;
+import by.pressf.productms.dto.internal.ProductCreationData;
+import by.pressf.productms.dto.internal.ProductData;
+import by.pressf.productms.dto.internal.ProductPatchingData;
 import by.pressf.productms.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

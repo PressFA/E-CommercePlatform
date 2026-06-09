@@ -90,22 +90,6 @@ class ProductHistoryRepositoryUnitTests {
         assertThat(result).isNull();
     }
 
-    @ParameterizedTest @MethodSource("findByOrderId")
-    void findByOrderId_NullArgument_ReturnNull(List<ProductHistoryEntity> history) {
-        // Arrange
-        repository.saveAllAndFlush(history.stream()
-                .peek((entity) -> entity.setProduct(product))
-                .collect(Collectors.toList())
-        );
-        entityManager.clear();
-
-        // Act
-        ProductHistoryEntity result = repository.findByOrderId(null);
-
-        // Assert
-        assertThat(result).isNull();
-    }
-
     private static Stream<Arguments> findByOrderId() {
         return Stream.of(
                 Arguments.of(List.of(

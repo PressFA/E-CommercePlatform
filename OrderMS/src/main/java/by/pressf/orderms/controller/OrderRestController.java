@@ -1,7 +1,7 @@
 package by.pressf.orderms.controller;
 
-import by.pressf.orderms.dto.CreateOrderRequest;
-import by.pressf.orderms.dto.OrderCreationData;
+import by.pressf.orderms.dto.incoming.CreateOrderRequest;
+import by.pressf.orderms.dto.internal.OrderCreationData;
 import by.pressf.orderms.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

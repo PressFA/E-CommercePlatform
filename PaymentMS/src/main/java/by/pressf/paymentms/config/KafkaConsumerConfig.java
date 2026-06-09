@@ -104,9 +104,9 @@ public class KafkaConsumerConfig {
 
                     log.info("The message {} has been sent to {} topic",
                             consumerRecord.value().getClass().getSimpleName(),
-                            env.getRequiredProperty("order.dlt.name"));
+                            env.getRequiredProperty("payment.dlt.name"));
                     return new TopicPartition(
-                            env.getRequiredProperty("order.dlt.name"),
+                            env.getRequiredProperty("payment.dlt.name"),
                             consumerRecord.partition()
                     );
                 }
