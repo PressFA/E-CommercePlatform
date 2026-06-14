@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -25,24 +24,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EmailServiceUnitTests {
-    @Mock
-    private JavaMailSender mailSender;
-    @InjectMocks
-    private EmailService emailService;
-
-    @ParameterizedTest
-    @CsvSource(value = {
-            "null, subject, body",
-            "to, null, body",
-            "to, subject, null"
-    }, nullValues = "null")
-    void sendEmail_AnyParameterIsNull_ThrowsNpe(String to, String subject, String body) {
-        // Arrange & Act & Assert
-        assertThrows(NullPointerException.class,
-                () -> emailService.sendEmail(to, subject, body));
-
-        verify(mailSender, never()).send(any(SimpleMailMessage.class));
-    }
+    private @Mock JavaMailSender mailSender;
+    private @InjectMocks EmailService emailService;
 
     @ParameterizedTest @MethodSource("createThrowable")
     void sendEmail_MailSenderFails_PropagatesException(Throwable ex) {

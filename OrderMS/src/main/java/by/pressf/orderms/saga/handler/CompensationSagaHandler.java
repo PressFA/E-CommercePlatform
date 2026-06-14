@@ -14,14 +14,13 @@ import by.pressf.orderms.service.IdempotencyService;
 import by.pressf.orderms.service.OrderHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class CompensationSagaHandler {
     private final IdempotencyService idempotencyService;
@@ -29,11 +28,7 @@ public class CompensationSagaHandler {
     private final KafkaCommandPublisher kafkaCommandPublisher;
 
     @Transactional("transactionManager")
-    public void handleProductReservationFailedEvent(@NonNull ProductReservationFailedEvent event,
-                                                    @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleProductReservationFailedEvent(ProductReservationFailedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.FAIL,
@@ -49,11 +44,7 @@ public class CompensationSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handlePaymentChargeFailedEvent(@NonNull PaymentChargeFailedEvent event,
-                                               @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handlePaymentChargeFailedEvent(PaymentChargeFailedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.FAIL,
@@ -69,11 +60,7 @@ public class CompensationSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleUserBalanceDebitFailedEvent(@NonNull UserBalanceDebitFailedEvent event,
-                                                  @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleUserBalanceDebitFailedEvent(UserBalanceDebitFailedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.FAIL,
@@ -89,11 +76,7 @@ public class CompensationSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleOrderCompletionFailedEvent(@NonNull OrderCompletionFailedEvent event,
-                                                 @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleOrderCompletionFailedEvent(OrderCompletionFailedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.FAIL,

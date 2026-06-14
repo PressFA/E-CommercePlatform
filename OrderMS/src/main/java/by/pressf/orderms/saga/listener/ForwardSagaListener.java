@@ -5,6 +5,7 @@ import by.pressf.core.dto.orchestration.events.order.OrderCreatedEvent;
 import by.pressf.core.dto.orchestration.events.payment.PaymentChargedEvent;
 import by.pressf.core.dto.orchestration.events.product.ProductReservedEvent;
 import by.pressf.core.dto.orchestration.events.user.UserBalanceDebitedEvent;
+import by.pressf.core.exceptions.DuplicateMessageException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.saga.handler.ForwardSagaHandler;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,8 @@ public class ForwardSagaListener { // Здесь события, когда вс
             log.info("The OrderCreatedEvent event from the successful-events topic has been received");
 
             handler.handleOrderCreatedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -43,6 +46,8 @@ public class ForwardSagaListener { // Здесь события, когда вс
             log.info("The ProductReservedEvent event from the successful-events topic has been received");
 
             handler.handleProductReservedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -56,6 +61,8 @@ public class ForwardSagaListener { // Здесь события, когда вс
             log.info("The PaymentChargedEvent event from the successful-events topic has been received");
 
             handler.handlePaymentChargedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -69,6 +76,8 @@ public class ForwardSagaListener { // Здесь события, когда вс
             log.info("The UserBalanceDebitedEvent event from the successful-events topic has been received");
 
             handler.handleUserBalanceDebitedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -82,6 +91,8 @@ public class ForwardSagaListener { // Здесь события, когда вс
             log.info("The OrderCompletedEvent event from the successful-events topic has been received");
 
             handler.handleOrderCompletedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);

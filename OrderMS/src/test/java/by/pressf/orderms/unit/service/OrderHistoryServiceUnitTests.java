@@ -7,7 +7,6 @@ import by.pressf.orderms.service.OrderHistoryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -23,24 +22,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderHistoryServiceUnitTests {
-    @Mock
-    private OrderHistoryRepository orderHistoryRepository;
-    @InjectMocks
-    private OrderHistoryService orderHistoryService;
-
-    @ParameterizedTest
-    @CsvSource(value = {
-            "null, SUCCESS, reason",
-            "a027ba9d-813f-44cb-bc8a-bb818a8a67bc, null, reason",
-            "a027ba9d-813f-44cb-bc8a-bb818a8a67bc, SUCCESS, null"
-    }, nullValues = "null")
-    void createHistoryLog_NullArgument_ThrowsException(UUID orderId, OrderHistoryStatus status, String reason) {
-        // Arrange & Act & Assert
-        assertThrows(NullPointerException.class,
-                () -> orderHistoryService.createHistoryLog(orderId, status, reason));
-
-        verify(orderHistoryRepository, never()).save(any(OrderHistoryEntity.class));
-    }
+    private @Mock OrderHistoryRepository orderHistoryRepository;
+    private @InjectMocks OrderHistoryService orderHistoryService;
 
     @ParameterizedTest
     @EnumSource(OrderHistoryStatus.class)

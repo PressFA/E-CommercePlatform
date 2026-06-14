@@ -35,12 +35,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductHistoryServiceUnitTests {
-    @Mock
-    private ProductRepository productRepository;
-    @Mock
-    private ProductHistoryRepository productHistoryRepository;
-    @InjectMocks
-    private ProductHistoryService productHistoryService;
+    private @Mock ProductRepository productRepository;
+    private @Mock ProductHistoryRepository productHistoryRepository;
+    private @InjectMocks ProductHistoryService productHistoryService;
 
     @ParameterizedTest @NullSource
     void reserveProduct_RequestIsNull_ThrowsNpe(ProductReservationRequest req) {
@@ -72,7 +69,8 @@ public class ProductHistoryServiceUnitTests {
     }
 
     @ParameterizedTest @MethodSource("createArgForMethodReserveProduct")
-    void reserveProduct_InsufficientQuantity_ThrowsInsufficientException(ProductReservationRequest req, ProductEntity product) {
+    void reserveProduct_InsufficientQuantity_ThrowsInsufficientException(ProductReservationRequest req,
+                                                                         ProductEntity product) {
         // Arrange
         product.setQuantity(3);
         when(productRepository.findById(any(UUID.class)))
@@ -88,7 +86,8 @@ public class ProductHistoryServiceUnitTests {
     }
 
     @ParameterizedTest @MethodSource("createArgForMethodReserveProduct")
-    void reserveProduct_ProductRepositorySaveFails_ThrowsDataAccessException(ProductReservationRequest req, ProductEntity product) {
+    void reserveProduct_ProductRepositorySaveFails_ThrowsDataAccessException(ProductReservationRequest req,
+                                                                             ProductEntity product) {
         // Arrange
         when(productRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.of(product));
@@ -105,7 +104,8 @@ public class ProductHistoryServiceUnitTests {
     }
 
     @ParameterizedTest @MethodSource("createArgForMethodReserveProduct")
-    void reserveProduct_HistoryRepositorySaveFails_ThrowsDataAccessException(ProductReservationRequest req, ProductEntity product) {
+    void reserveProduct_HistoryRepositorySaveFails_ThrowsDataAccessException(ProductReservationRequest req,
+                                                                             ProductEntity product) {
         // Arrange
         when(productRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.of(product));
@@ -124,7 +124,8 @@ public class ProductHistoryServiceUnitTests {
     }
 
     @ParameterizedTest @MethodSource("createArgForMethodReserveProduct")
-    void reserveProduct_ValidRequest_ReturnsTotalCostAndSavesData(ProductReservationRequest req, ProductEntity product) {
+    void reserveProduct_ValidRequest_ReturnsTotalCostAndSavesData(ProductReservationRequest req,
+                                                                  ProductEntity product) {
         // Arrange
         ProductHistoryEntity history = ProductHistoryEntity.builder()
                 .orderId(req.orderId())
@@ -156,25 +157,18 @@ public class ProductHistoryServiceUnitTests {
         return Stream.of(
                 Arguments.of(
                         new ProductReservationRequest(UUID.randomUUID(), UUID.randomUUID(), 5),
-                        ProductEntity.builder().name("seedlings").quantity(10).price(new BigDecimal("100.00")).build()
+                        ProductEntity.builder()
+                                .name("seedlings")
+                                .quantity(10)
+                                .price(new BigDecimal("100.00"))
+                                .build()
                 )
         );
     }
 
-    @ParameterizedTest @NullSource
-    void cancelProductReservation_OrderIdIsNull_ThrowsNpe(UUID orderId) {
-        // Arrange & Act & Assert
-        assertThrows(NullPointerException.class,
-                () -> productHistoryService.cancelProductReservation(orderId));
-
-        verify(productHistoryRepository, never()).findByOrderId(any(UUID.class));
-        verify(productRepository, never()).findById(any(UUID.class));
-        verify(productRepository, never()).save(any(ProductEntity.class));
-        verify(productHistoryRepository, never()).save(any(ProductHistoryEntity.class));
-    }
-
     @ParameterizedTest @MethodSource("createArgForMethodCancelProductReservation")
-    void cancelProductReservation_HistoryNotFound_ThrowsNotFoundException(ProductEntity product, ProductHistoryEntity history) {
+    void cancelProductReservation_HistoryNotFound_ThrowsNotFoundException(ProductEntity product,
+                                                                          ProductHistoryEntity history) {
         // Arrange
         history.setProduct(product);
 
@@ -192,7 +186,8 @@ public class ProductHistoryServiceUnitTests {
     }
 
     @ParameterizedTest @MethodSource("createArgForMethodCancelProductReservation")
-    void cancelProductReservation_ProductInHistoryNotFound_ThrowsNotFoundException(ProductEntity product, ProductHistoryEntity history) {
+    void cancelProductReservation_ProductInHistoryNotFound_ThrowsNotFoundException(ProductEntity product,
+                                                                                   ProductHistoryEntity history) {
         // Arrange
         history.setProduct(product);
 
@@ -212,7 +207,8 @@ public class ProductHistoryServiceUnitTests {
     }
 
     @ParameterizedTest @MethodSource("createArgForMethodCancelProductReservation")
-    void cancelProductReservation_ProductRepositorySaveFails_PropagatesException(ProductEntity product, ProductHistoryEntity history) {
+    void cancelProductReservation_ProductRepositorySaveFails_PropagatesException(ProductEntity product,
+                                                                                 ProductHistoryEntity history) {
         // Arrange
         history.setProduct(product);
 
@@ -234,7 +230,8 @@ public class ProductHistoryServiceUnitTests {
     }
 
     @ParameterizedTest @MethodSource("createArgForMethodCancelProductReservation")
-    void cancelProductReservation_HistoryRepositorySaveFails_PropagatesException(ProductEntity product, ProductHistoryEntity history) {
+    void cancelProductReservation_HistoryRepositorySaveFails_PropagatesException(ProductEntity product,
+                                                                                 ProductHistoryEntity history) {
         // Arrange
         history.setProduct(product);
 
@@ -258,7 +255,8 @@ public class ProductHistoryServiceUnitTests {
     }
 
     @ParameterizedTest @MethodSource("createArgForMethodCancelProductReservation")
-    void cancelProductReservation_ValidOrderId_RestoresQuantityAndSetsCancelledStatus(ProductEntity product, ProductHistoryEntity history) {
+    void cancelProductReservation_ValidOrderId_RestoresQuantityAndSetsCancelledStatus(ProductEntity product,
+                                                                                      ProductHistoryEntity history) {
         // Arrange
         int mustBe = product.getQuantity() + history.getQuantity();
         history.setProduct(product);
@@ -289,8 +287,12 @@ public class ProductHistoryServiceUnitTests {
                 Arguments.of(
                         ProductEntity.builder().id(UUID.randomUUID()).name("seedlings").quantity(4)
                                 .price(new BigDecimal("100.00")).build(),
-                        ProductHistoryEntity.builder().id(UUID.randomUUID()).orderId(UUID.randomUUID()).quantity(5)
-                                .status(ProductStatus.RESERVED).build()
+                        ProductHistoryEntity.builder()
+                                .id(UUID.randomUUID())
+                                .orderId(UUID.randomUUID())
+                                .quantity(5)
+                                .status(ProductStatus.RESERVED)
+                                .build()
                 )
         );
     }

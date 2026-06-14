@@ -31,12 +31,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PaymentServiceUnitTests {
-    @Mock
-    private StripeService stripeService;
-    @Mock
-    private PaymentRepository paymentRepository;
-    @InjectMocks
-    private PaymentService paymentService;
+    private @Mock StripeService stripeService;
+    private @Mock PaymentRepository paymentRepository;
+    private @InjectMocks PaymentService paymentService;
 
     @ParameterizedTest @NullSource
     void createOrderPayment_RequestIsNull_ThrowsNpe(CreateOrderPaymentRequest req) throws StripeException {

@@ -12,7 +12,7 @@ import by.pressf.productms.exception.ProductNotFoundByOrderIdException;
 import by.pressf.productms.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,14 +22,13 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@NullMarked
 @RequiredArgsConstructor
 public class ProductHistoryService {
     private final ProductRepository productRepository;
     private final ProductHistoryRepository productHistoryRepository;
 
-    public BigDecimal reserveProduct(@NonNull ProductReservationRequest req) {
-        Objects.requireNonNull(req, "ProductReservationRequest must not be null");
-
+    public BigDecimal reserveProduct(ProductReservationRequest req) {
         ProductEntity product = productRepository.findById(req.productId())
                 .orElseThrow(() -> new ProductNotFoundException(req.productId()));
 
@@ -51,9 +50,7 @@ public class ProductHistoryService {
         return product.getPrice().multiply(new BigDecimal(req.quantity()));
     }
 
-    public void cancelProductReservation(@NonNull UUID orderId) {
-        Objects.requireNonNull(orderId, "orderId must not be null");
-
+    public void cancelProductReservation(UUID orderId) {
         ProductHistoryEntity productHistory = productHistoryRepository.findByOrderId(orderId);
 
         if (Objects.isNull(productHistory)) {

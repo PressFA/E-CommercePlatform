@@ -4,6 +4,7 @@ import by.pressf.core.dto.orchestration.commands.order.ConfirmOrderCommand;
 import by.pressf.core.dto.orchestration.commands.order.RejectOrderCommand;
 import by.pressf.core.dto.orchestration.events.order.OrderCompletionFailedEvent;
 import by.pressf.core.dto.orchestration.events.order.OrderRejectionFailedEvent;
+import by.pressf.core.exceptions.DuplicateMessageException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.exception.OrderNotFoundException;
 import by.pressf.orderms.kafka.handler.OrderCommandsHandler;
@@ -32,6 +33,8 @@ public class OrderCommandsListener {
             log.info("The ConfirmOrderCommand command from the order-commands topic has been received");
 
             handler.handleConfirmOrderCommand(command, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (OrderNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
 
@@ -54,6 +57,8 @@ public class OrderCommandsListener {
             log.warn("The RejectOrderCommand command from the order-commands topic has been received");
 
             handler.handleRejectOrderCommand(command, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (OrderNotFoundException | DataAccessException e) {
             log.error(e.getMessage());
 

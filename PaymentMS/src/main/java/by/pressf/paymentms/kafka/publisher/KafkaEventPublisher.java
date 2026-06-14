@@ -6,39 +6,30 @@ import by.pressf.core.dto.orchestration.events.payment.PaymentRefundedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class KafkaEventPublisher {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void sendMessageBalanceTopUpCompletedEvent(@NonNull String keyMessage, @NonNull BalanceTopUpCompletedEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendMessageBalanceTopUpCompletedEvent(String keyMessage, BalanceTopUpCompletedEvent valueMessage) {
         send(env.getRequiredProperty("r-email-w-payment.topic.name"), keyMessage, valueMessage);
     }
 
-    public void sendMessagePaymentChargedEvent(@NonNull String keyMessage, @NonNull PaymentChargedEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendMessagePaymentChargedEvent(String keyMessage, PaymentChargedEvent valueMessage) {
         send(env.getRequiredProperty("successful-events.topic.name"), keyMessage, valueMessage);
     }
 
-    public void sendMessagePaymentRefundedEvent(@NonNull String keyMessage, @NonNull PaymentRefundedEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendMessagePaymentRefundedEvent(String keyMessage, PaymentRefundedEvent valueMessage) {
         send(env.getRequiredProperty("compensating-events.topic.name"), keyMessage, valueMessage);
     }
 

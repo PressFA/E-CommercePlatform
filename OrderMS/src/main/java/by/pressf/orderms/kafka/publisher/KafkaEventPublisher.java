@@ -6,42 +6,30 @@ import by.pressf.core.dto.orchestration.events.order.OrderRejectedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
-@Service
+@Component
+@NullMarked
 @RequiredArgsConstructor
 public class KafkaEventPublisher {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void sendOrderCreatedEvent(@NonNull String keyMessage,
-                                      @NonNull OrderCreatedEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendOrderCreatedEvent(String keyMessage, OrderCreatedEvent valueMessage) {
         send(env.getRequiredProperty("successful-events.topic.name"), keyMessage, valueMessage);
     }
 
-    public void sendOrderCompletedEvent(@NonNull String keyMessage,
-                                        @NonNull OrderCompletedEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendOrderCompletedEvent(String keyMessage, OrderCompletedEvent valueMessage) {
         send(env.getRequiredProperty("successful-events.topic.name"), keyMessage, valueMessage);
     }
 
-    public void sendOrderRejectedEvent(@NonNull String keyMessage,
-                                       @NonNull OrderRejectedEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendOrderRejectedEvent(String keyMessage, OrderRejectedEvent valueMessage) {
         send(env.getRequiredProperty("compensating-events.topic.name"), keyMessage, valueMessage);
     }
 

@@ -1,6 +1,7 @@
 package by.pressf.emailnotificationms.kafka.listener;
 
 import by.pressf.core.dto.choreography.events.BalanceTopUpCompletedEvent;
+import by.pressf.core.exceptions.DuplicateMessageException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import by.pressf.emailnotificationms.service.EmailService;
@@ -38,6 +39,8 @@ public class REmailWPaymentEventsListener {
             log.info("The email was successfully delivered to the post office {}", event.email());
 
             idempotencyService.saveIdempotentKey(messageId, event.getClass().getSimpleName());
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (MailSendException e) {
             log.error(e.getMessage());
             throw new RetryableException(e);

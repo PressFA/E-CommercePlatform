@@ -4,6 +4,7 @@ import by.pressf.core.dto.orchestration.events.order.OrderCompletionFailedEvent;
 import by.pressf.core.dto.orchestration.events.payment.PaymentChargeFailedEvent;
 import by.pressf.core.dto.orchestration.events.product.ProductReservationFailedEvent;
 import by.pressf.core.dto.orchestration.events.user.UserBalanceDebitFailedEvent;
+import by.pressf.core.exceptions.DuplicateMessageException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.saga.handler.CompensationSagaHandler;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,8 @@ public class CompensationSagaListener { // Здесь события, когда
             log.warn("The ProductReservationFailedEvent event from the errors-successful-events topic has been received");
 
             handler.handleProductReservationFailedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -42,6 +45,8 @@ public class CompensationSagaListener { // Здесь события, когда
             log.warn("The PaymentChargeFailedEvent event from the errors-successful-events topic has been received");
 
             handler.handlePaymentChargeFailedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -55,6 +60,8 @@ public class CompensationSagaListener { // Здесь события, когда
             log.warn("The UserBalanceDebitFailedEvent event from the errors-successful-events topic has been received");
 
             handler.handleUserBalanceDebitFailedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -68,6 +75,8 @@ public class CompensationSagaListener { // Здесь события, когда
             log.warn("The OrderCompletionFailedEvent event from the errors-successful-events topic has been received");
 
             handler.handleOrderCompletionFailedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);

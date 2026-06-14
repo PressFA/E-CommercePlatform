@@ -29,7 +29,7 @@ repositories {
         url = uri("https://maven.pkg.github.com/pressfa/e-commerceplatformlibrary")
         credentials {
             username = "PressFA"
-            password = "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"
+            password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("githubToken")
         }
     }
     mavenCentral()
@@ -53,7 +53,7 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    implementation 'by.pressf:core:0.1.3-SNAPSHOT'
+    implementation 'by.pressf:core:0.1.4-SNAPSHOT'
     implementation 'com.stripe:stripe-java:31.1.0'
 
     liquibaseRuntime 'org.liquibase:liquibase-core:4.31.1'

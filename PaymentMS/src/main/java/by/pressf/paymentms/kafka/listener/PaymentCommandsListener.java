@@ -46,7 +46,7 @@ public class PaymentCommandsListener {
 
             throw handleStripeException(e, env.getRequiredProperty("errors-successful-events.topic.name"),
                     command.orderId(), failedEvent);
-        } catch (NullPointerException | PaymentNotFoundByOrderIdException | DataAccessException e) {
+        } catch (PaymentNotFoundByOrderIdException | DataAccessException e) {
             log.error(e.getMessage());
 
             PaymentChargeFailedEvent failedEvent = createChargeFailedEvent(command);
@@ -72,7 +72,7 @@ public class PaymentCommandsListener {
 
             throw handleStripeException(e, env.getRequiredProperty("errors-compensating-events.topic.name"),
                     command.orderId(), failedEvent);
-        } catch (NullPointerException | PaymentNotFoundByOrderIdException | DataAccessException e) {
+        } catch (PaymentNotFoundByOrderIdException | DataAccessException e) {
             log.error(e.getMessage());
 
             PaymentRefundFailedEvent failedEvent = createRefundFailedEvent(command);
@@ -83,16 +83,13 @@ public class PaymentCommandsListener {
     }
 
     private <T> RuntimeException handleStripeException(PaymentFailedException e, String topic, UUID orderId, T failedEvent) {
-        RuntimeException returnEx;
         switch (e.getStatusCode()) {
-            case 400, 401, 402, 403, 404 ->
-                    returnEx = new RetryableException(e, topic, orderId, failedEvent);
+            case 400, 401, 402, 403, 404 -> throw new RetryableException(e, topic, orderId, failedEvent);
             default -> {
                 if (e.getStatusCode() == 0) log.error("Error on the part of our service");
-                returnEx = new NotRetryableException(e, topic, orderId, failedEvent);
+                throw new NotRetryableException(e, topic, orderId, failedEvent);
             }
         }
-        return returnEx;
     }
 
     private PaymentChargeFailedEvent createChargeFailedEvent(ChargePaymentCommand command) {

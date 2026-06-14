@@ -4,6 +4,7 @@ import by.pressf.core.dto.orchestration.commands.product.CancelProductReservatio
 import by.pressf.core.dto.orchestration.commands.product.ReserveProductCommand;
 import by.pressf.core.dto.orchestration.events.product.ProductReservationCancelFailedEvent;
 import by.pressf.core.dto.orchestration.events.product.ProductReservationFailedEvent;
+import by.pressf.core.exceptions.DuplicateMessageException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import by.pressf.productms.exception.ProductHistoryNotFoundException;
@@ -37,6 +38,8 @@ public class ProductCommandsListener {
             log.info("The ReserveProductCommand command from the product-commands topic has been received");
 
             handler.handleReserveProductCommand(command, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (OptimisticLockingFailureException e) {
             log.error(e.getMessage());
 
@@ -61,6 +64,8 @@ public class ProductCommandsListener {
             log.warn("The CancelProductReservationCommand command from the product-commands topic has been received");
 
             handler.handleCancelProductReservationCommand(command, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (OptimisticLockingFailureException e) {
             log.error(e.getMessage());
 

@@ -4,6 +4,7 @@ import by.pressf.core.dto.orchestration.events.order.OrderRejectionFailedEvent;
 import by.pressf.core.dto.orchestration.events.payment.PaymentRefundFailedEvent;
 import by.pressf.core.dto.orchestration.events.product.ProductReservationCancelFailedEvent;
 import by.pressf.core.dto.orchestration.events.user.UserBalanceDebitCancelFailedEvent;
+import by.pressf.core.exceptions.DuplicateMessageException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.saga.handler.CriticalAuditSagaHandler;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,8 @@ public class CriticalAuditSagaListener { // Здесь критические с
             log.error("The OrderRejectionFailedEvent event from the errors-compensating-events topic has been received");
 
             handler.handleOrderRejectionFailedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -42,6 +45,8 @@ public class CriticalAuditSagaListener { // Здесь критические с
             log.error("The ProductReservationCanceledEvent event from the errors-compensating-events topic has been received");
 
             handler.handleProductReservationCancelFailedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -55,6 +60,8 @@ public class CriticalAuditSagaListener { // Здесь критические с
             log.error("The PaymentRefundFailedEvent event from the errors-compensating-events topic has been received");
 
             handler.handlePaymentRefundFailedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -68,6 +75,8 @@ public class CriticalAuditSagaListener { // Здесь критические с
             log.error("The UserBalanceDebitCancelFailedEvent event from the errors-compensating-events topic has been received");
 
             handler.handleUserBalanceDebitCancelFailedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);

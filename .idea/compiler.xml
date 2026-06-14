@@ -14,14 +14,13 @@
         <processorPath useClasspath="false">
           <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.42/8365263844ebb62398e0dc33057ba10ba472d3b8/lombok-1.18.42.jar" />
         </processorPath>
-        <module name="ProductMS.main" />
-        <module name="ProductMS.test" />
+        <module name="ShoppingCartMS.main" />
+        <module name="ShoppingCartMS.test" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="by.pressf.ProductMs" target="21" />
+      <module name="by.pressf.ProductMS" target="21" />
       <module name="Core" target="21" />
-      <module name="ProductMs" target="21" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -46,7 +45,7 @@
       <module name="UserMS" options="-parameters" />
       <module name="UserMS.main" options="-parameters" />
       <module name="UserMS.test" options="-parameters" />
-      <module name="by.pressf.ProductMs" options="-parameters" />
+      <module name="by.pressf.ProductMS" options="-parameters" />
     </option>
   </component>
 </project>

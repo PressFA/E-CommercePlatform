@@ -66,10 +66,14 @@ public class OrderRepositoryUnitTests {
 
     private static Stream<Arguments> save_NullArgument() {
         return Stream.of(
-                Arguments.of(new OrderEntity(null, null, UUID.randomUUID(), 1, OrderStatus.CREATED)),
-                Arguments.of(new OrderEntity(null, UUID.randomUUID(), null, 1, OrderStatus.CREATED)),
-                Arguments.of(new OrderEntity(null, UUID.randomUUID(), UUID.randomUUID(), null, OrderStatus.CREATED)),
-                Arguments.of(new OrderEntity(null, UUID.randomUUID(), UUID.randomUUID(), 1, null))
+                Arguments.of(new OrderEntity(null, null, UUID.randomUUID(),
+                        1, OrderStatus.CREATED)),
+                Arguments.of(new OrderEntity(null, UUID.randomUUID(), null,
+                        1, OrderStatus.CREATED)),
+                Arguments.of(new OrderEntity(null, UUID.randomUUID(), UUID.randomUUID(),
+                        null, OrderStatus.CREATED)),
+                Arguments.of(new OrderEntity(null, UUID.randomUUID(), UUID.randomUUID(),
+                        1, null))
         );
     }
 

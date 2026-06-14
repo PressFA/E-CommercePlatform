@@ -6,25 +6,20 @@ import by.pressf.orderms.service.IdempotencyService;
 import by.pressf.orderms.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
-import org.springframework.stereotype.Service;
+import org.jspecify.annotations.NullMarked;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
-@Service
+@Component
+@NullMarked
 @RequiredArgsConstructor
 public class ROrderWCartEventsHandler {
     private final OrderService orderService;
     private final IdempotencyService idempotencyService;
 
     @Transactional("transactionManager")
-    public void handleCreateOrderShoppingCart(@NonNull CreateOrderShoppingCart event,
-                                              @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleCreateOrderShoppingCart(CreateOrderShoppingCart event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         log.info("Received a request from a user with the ID {} to create an order for an item with the ID {}, quantity {}",

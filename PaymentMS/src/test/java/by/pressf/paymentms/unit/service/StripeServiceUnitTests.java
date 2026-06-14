@@ -32,8 +32,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class StripeServiceUnitTests {
-    @InjectMocks
-    private StripeService stripeService;
+    private @InjectMocks StripeService stripeService;
 
     @ParameterizedTest @NullSource
     void createPayment_RequestIsNull_ThrowsNpe(StripeOrderPaymentDto dto) {

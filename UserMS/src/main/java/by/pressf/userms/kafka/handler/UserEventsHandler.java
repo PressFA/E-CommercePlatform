@@ -8,26 +8,21 @@ import by.pressf.userms.service.IdempotencyService;
 import by.pressf.userms.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class UserEventsHandler {
     private final UserService userService;
-    private final KafkaEventPublisher kafkaEventPublisher;
     private final IdempotencyService idempotencyService;
+    private final KafkaEventPublisher kafkaEventPublisher;
 
     @Transactional("transactionManager")
-    public void handleUserBalanceCreditFailedEvent(@NonNull UserBalanceCreditFailedEvent event,
-                                                   @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleUserBalanceCreditFailedEvent(UserBalanceCreditFailedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         userService.cancelTopUpUserBalance(new UserBalanceRequest(event.userId(), event.amount()));

@@ -1,11 +1,14 @@
 package by.pressf.shoppingcartms.unit.service;
 
+import by.pressf.core.dto.orchestration.events.cart.CreateOrderShoppingCart;
 import by.pressf.core.exceptions.AppError;
 import by.pressf.shoppingcartms.dao.entity.CartEntity;
 import by.pressf.shoppingcartms.dao.repository.ShoppingCartRepository;
+import by.pressf.shoppingcartms.dto.incoming.BuyProductRequest;
 import by.pressf.shoppingcartms.dto.incoming.CreateCartRequest;
 import by.pressf.shoppingcartms.dto.incoming.QuantityChangeCart;
 import by.pressf.shoppingcartms.dto.internal.CartInfo;
+import by.pressf.shoppingcartms.kafka.publisher.KafkaEventPublisher;
 import by.pressf.shoppingcartms.service.ShoppingCartService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,10 +19,9 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.env.Environment;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.KafkaException;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,24 +35,9 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceUnitTests {
-    @Mock
-    private Environment env;
-    @Mock
-    private KafkaTemplate<String, Object> kafkaTemplate;
-    @Mock
-    private ShoppingCartRepository shoppingCartRepository;
-
-    @InjectMocks
-    private ShoppingCartService cartService;
-
-    @ParameterizedTest @NullSource
-    void getShoppingCartsByUser_UserIdIsNull_ThrowsNpe(UUID userId) {
-        // Arrange & Act & Assert
-        assertThrows(NullPointerException.class,
-                () -> cartService.getShoppingCartsByUser(userId));
-
-        verify(shoppingCartRepository, never()).findAllByUserId(any(UUID.class));
-    }
+    private @Mock KafkaEventPublisher kafkaEventPublisher;
+    private @Mock ShoppingCartRepository shoppingCartRepository;
+    private @InjectMocks ShoppingCartService cartService;
 
     @Test
     void getShoppingCartsByUser_RepositoryFails_PropagatesDataAccessException() {
@@ -107,7 +94,8 @@ class CartServiceUnitTests {
         assertThrows(AppError.class,
                 () -> cartService.createCart(cartRequest));
 
-        verify(shoppingCartRepository, times(1)).findByUserIdAndProductId(any(UUID.class), any(UUID.class));
+        verify(shoppingCartRepository, times(1))
+                .findByUserIdAndProductId(any(UUID.class), any(UUID.class));
         verify(shoppingCartRepository, never()).save(any(CartEntity.class));
     }
 
@@ -123,7 +111,8 @@ class CartServiceUnitTests {
         assertThrows(DataAccessException.class,
                 () -> cartService.createCart(cartRequest));
 
-        verify(shoppingCartRepository, times(1)).findByUserIdAndProductId(any(UUID.class), any(UUID.class));
+        verify(shoppingCartRepository, times(1))
+                .findByUserIdAndProductId(any(UUID.class), any(UUID.class));
         verify(shoppingCartRepository, times(1)).save(any(CartEntity.class));
     }
 
@@ -147,7 +136,8 @@ class CartServiceUnitTests {
         assertThat(result.productId()).isEqualTo(cartRequest.productId());
         assertThat(result.quantity()).isEqualTo(cartRequest.quantity());
 
-        verify(shoppingCartRepository, times(1)).findByUserIdAndProductId(any(UUID.class), any(UUID.class));
+        verify(shoppingCartRepository, times(1))
+                .findByUserIdAndProductId(any(UUID.class), any(UUID.class));
         verify(shoppingCartRepository, times(1)).save(any(CartEntity.class));
     }
 
@@ -243,23 +233,13 @@ class CartServiceUnitTests {
         assertThat(result.id()).isEqualTo(cartEntity.getId());
         assertThat(result.userId()).isEqualTo(cartEntity.getUserId());
         assertThat(result.productId()).isEqualTo(cartEntity.getProductId());
-        assertThat(result.quantity()).isEqualTo(cartEntity.getQuantity());
+        assertThat(result.quantity()).isEqualTo(1);
     }
 
     private static Stream<Arguments> updateQuantity() {
         return Stream.of(
                 Arguments.of(new QuantityChangeCart(UUID.randomUUID(), -1))
         );
-    }
-
-    @ParameterizedTest @NullSource
-    void removeItemFromCart_IdIsNull_ThrowsNpe(UUID cartId) {
-        // Arrange & Act & Assert
-        assertThrows(NullPointerException.class,
-                () -> cartService.removeItemFromCart(cartId));
-
-        verify(shoppingCartRepository, never()).findById(any(UUID.class));
-        verify(shoppingCartRepository, never()).delete(any(CartEntity.class));
     }
 
     @Test
@@ -303,5 +283,85 @@ class CartServiceUnitTests {
         // Assert
         verify(shoppingCartRepository, times(1)).findById(any(UUID.class));
         verify(shoppingCartRepository, times(1)).delete(any(CartEntity.class));
+    }
+
+    @Test
+    void createOrderFromShoppingCart_cartNotFound_ThrowsAppError() {
+        // Arrange
+        BuyProductRequest buyProductRequest = new BuyProductRequest(UUID.randomUUID(), "test@gmail.com");
+
+        when(shoppingCartRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(AppError.class,
+                () -> cartService.createOrderFromShoppingCart(buyProductRequest));
+
+        verify(shoppingCartRepository, times(1)).findById(any(UUID.class));
+    }
+
+    @ParameterizedTest @MethodSource("createOrderFromShoppingCart")
+    void createOrderFromShoppingCart_KafkaPublisherFails_PropagatesException(BuyProductRequest request,
+                                                                             CartEntity cartEntity) {
+        // Arrange
+        when(shoppingCartRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(cartEntity));
+        doThrow(mock(KafkaException.class)).when(kafkaEventPublisher)
+                .sendMessageCreateOrderShoppingCart(anyString(), any(CreateOrderShoppingCart.class));
+
+        // Act & Assert
+        assertThrows(KafkaException.class,
+                () -> cartService.createOrderFromShoppingCart(request));
+
+        verify(shoppingCartRepository, times(1)).findById(any(UUID.class));
+        verify(kafkaEventPublisher, times(1))
+                .sendMessageCreateOrderShoppingCart(anyString(), any(CreateOrderShoppingCart.class));
+    }
+
+    @ParameterizedTest @MethodSource("createOrderFromShoppingCart")
+    void createOrderFromShoppingCart_RepositoryDeleteFails_PropagatesDataAccessException(BuyProductRequest request,
+                                                                                         CartEntity cartEntity) {
+        // Arrange
+        when(shoppingCartRepository.findById(any(UUID.class)))
+                .thenReturn(Optional.of(cartEntity));
+        doNothing().when(kafkaEventPublisher)
+                .sendMessageCreateOrderShoppingCart(anyString(), any(CreateOrderShoppingCart.class));
+        doThrow(mock(DataAccessException.class)).when(shoppingCartRepository).delete(any(CartEntity.class));
+
+        // Act & Assert
+        assertThrows(DataAccessException.class,
+                () -> cartService.createOrderFromShoppingCart(request));
+
+        verify(shoppingCartRepository, times(1)).findById(any(UUID.class));
+        verify(kafkaEventPublisher, times(1))
+                .sendMessageCreateOrderShoppingCart(anyString(), any(CreateOrderShoppingCart.class));
+        verify(shoppingCartRepository, times(1)).delete(any(CartEntity.class));
+    }
+
+    @ParameterizedTest @MethodSource("createOrderFromShoppingCart")
+    void createOrderFromShoppingCart_ValidRequest_SendsEventAndDeletesCart(BuyProductRequest request,
+                                                                           CartEntity cartEntity) {
+        // Arrange
+        when(shoppingCartRepository.findById(any(UUID.class))).thenReturn(Optional.of(cartEntity));
+        doNothing().when(kafkaEventPublisher)
+                .sendMessageCreateOrderShoppingCart(anyString(), any(CreateOrderShoppingCart.class));
+        doNothing().when(shoppingCartRepository).delete(any(CartEntity.class));
+
+        // Act
+        cartService.createOrderFromShoppingCart(request);
+
+        // Assert
+        verify(shoppingCartRepository, times(1)).findById(any(UUID.class));
+        verify(kafkaEventPublisher, times(1))
+                .sendMessageCreateOrderShoppingCart(anyString(), any(CreateOrderShoppingCart.class));
+        verify(shoppingCartRepository, times(1)).delete(any(CartEntity.class));
+    }
+
+    private static Stream<Arguments> createOrderFromShoppingCart() {
+        return Stream.of(
+                Arguments.of(new BuyProductRequest(UUID.randomUUID(), "test@gmail.com"),
+                        CartEntity.builder().id(UUID.randomUUID()).userId(UUID.randomUUID())
+                                .productId(UUID.randomUUID()).quantity(5).build())
+        );
     }
 }

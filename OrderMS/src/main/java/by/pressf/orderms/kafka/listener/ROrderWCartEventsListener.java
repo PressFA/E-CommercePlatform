@@ -1,6 +1,7 @@
 package by.pressf.orderms.kafka.listener;
 
 import by.pressf.core.dto.orchestration.events.cart.CreateOrderShoppingCart;
+import by.pressf.core.exceptions.DuplicateMessageException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.kafka.handler.ROrderWCartEventsHandler;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,8 @@ public class ROrderWCartEventsListener {
             log.info("The CreateOrderShoppingCart event from the r-order-w-cart-events topic has been received");
 
             handler.handleCreateOrderShoppingCart(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);

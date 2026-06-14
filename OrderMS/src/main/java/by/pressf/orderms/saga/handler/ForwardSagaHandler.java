@@ -16,15 +16,15 @@ import by.pressf.orderms.service.IdempotencyService;
 import by.pressf.orderms.service.OrderHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.Objects;
 
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class ForwardSagaHandler {
     private final IdempotencyService idempotencyService;
@@ -32,11 +32,7 @@ public class ForwardSagaHandler {
     private final KafkaCommandPublisher kafkaCommandPublisher;
 
     @Transactional("transactionManager")
-    public void handleOrderCreatedEvent(@NonNull OrderCreatedEvent event,
-                                        @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleOrderCreatedEvent(OrderCreatedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.SUCCESS,
@@ -55,11 +51,7 @@ public class ForwardSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleProductReservedEvent(@NonNull ProductReservedEvent event,
-                                           @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleProductReservedEvent(ProductReservedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.SUCCESS,
@@ -77,11 +69,7 @@ public class ForwardSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handlePaymentChargedEvent(@NonNull PaymentChargedEvent event,
-                                          @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handlePaymentChargedEvent(PaymentChargedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.SUCCESS,
@@ -99,11 +87,7 @@ public class ForwardSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleUserBalanceDebitedEvent(@NonNull UserBalanceDebitedEvent event,
-                                              @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleUserBalanceDebitedEvent(UserBalanceDebitedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.SUCCESS,
@@ -121,11 +105,7 @@ public class ForwardSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleOrderCompletedEvent(@NonNull OrderCompletedEvent event,
-                                          @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleOrderCompletedEvent(OrderCompletedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.SUCCESS,

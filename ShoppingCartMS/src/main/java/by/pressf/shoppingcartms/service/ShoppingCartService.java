@@ -11,31 +11,28 @@ import by.pressf.shoppingcartms.dto.incoming.QuantityChangeCart;
 import by.pressf.shoppingcartms.kafka.publisher.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
 @Service
+@NullMarked
 @RequiredArgsConstructor
 public class ShoppingCartService {
     private final KafkaEventPublisher kafkaEventPublisher;
     private final ShoppingCartRepository shoppingCartRepository;
 
     @Transactional(value = "transactionManager", readOnly = true)
-    public List<CartInfo> getShoppingCartsByUser(@NonNull UUID userId) {
-        Objects.requireNonNull(userId, "userId must not be null");
+    public List<CartInfo> getShoppingCartsByUser(UUID userId) {
         return shoppingCartRepository.findAllByUserId(userId);
     }
 
     @Transactional("transactionManager")
-    public CartInfo createCart(@NonNull CreateCartRequest cartRequest) {
-        Objects.requireNonNull(cartRequest, "CreateCartRequest must not be null");
-
+    public CartInfo createCart(CreateCartRequest cartRequest) {
         CartEntity checkCart = shoppingCartRepository.findByUserIdAndProductId(cartRequest.userId(), cartRequest.productId());
 
         if (checkCart != null) {
@@ -55,9 +52,7 @@ public class ShoppingCartService {
     }
 
     @Transactional("transactionManager")
-    public CartInfo updateQuantity(@NonNull QuantityChangeCart changeCart) {
-        Objects.requireNonNull(changeCart, "QuantityChangeCart must not be null");
-
+    public CartInfo updateQuantity(QuantityChangeCart changeCart) {
         CartEntity cart = shoppingCartRepository.findById(changeCart.id())
                 .orElseThrow(() -> new AppError(404,
                         "Cart item with id " + changeCart.id() + " not found"));
@@ -75,9 +70,7 @@ public class ShoppingCartService {
     }
 
     @Transactional("transactionManager")
-    public void removeItemFromCart(@NonNull UUID id) {
-        Objects.requireNonNull(id, "id must not be null");
-
+    public void removeItemFromCart(UUID id) {
         CartEntity cart = shoppingCartRepository.findById(id)
                 .orElseThrow(() -> new AppError(404,
                         "Cart item with id " + id + " not found"));
@@ -86,9 +79,7 @@ public class ShoppingCartService {
     }
 
     @Transactional("transactionManager")
-    public void createOrderFromShoppingCart(@NonNull BuyProductRequest buyRequest) {
-        Objects.requireNonNull(buyRequest, "BuyProductRequest must not be null");
-
+    public void createOrderFromShoppingCart(BuyProductRequest buyRequest) {
         CartEntity cart = shoppingCartRepository.findById(buyRequest.id())
                 .orElseThrow(() -> new AppError(404,
                         "Cart item with id " + buyRequest.id() + " not found"));

@@ -12,99 +12,63 @@ import by.pressf.core.dto.orchestration.commands.user.DebitUserBalanceCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class KafkaCommandPublisher {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     // ForwardSagaHandler
-    public void sendReserveProductCommand(@NonNull String keyMessage,
-                                          @NonNull ReserveProductCommand valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendReserveProductCommand(String keyMessage, ReserveProductCommand valueMessage) {
         send(env.getRequiredProperty("product.commands.topic.name"), keyMessage, valueMessage);
     }
 
     // ForwardSagaHandler
-    public void sendChargePaymentCommand(@NonNull String keyMessage,
-                                         @NonNull ChargePaymentCommand valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendChargePaymentCommand(String keyMessage, ChargePaymentCommand valueMessage) {
         send(env.getRequiredProperty("payment.commands.topic.name"), keyMessage, valueMessage);
     }
 
     // ForwardSagaHandler
-    public void sendDebitUserBalanceCommand(@NonNull String keyMessage,
-                                            @NonNull DebitUserBalanceCommand valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendDebitUserBalanceCommand(String keyMessage, DebitUserBalanceCommand valueMessage) {
         send(env.getRequiredProperty("user.commands.topic.name"), keyMessage, valueMessage);
     }
 
     // ForwardSagaHandler
-    public void sendConfirmOrderCommand(@NonNull String keyMessage,
-                                        @NonNull ConfirmOrderCommand valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendConfirmOrderCommand(String keyMessage, ConfirmOrderCommand valueMessage) {
         send(env.getRequiredProperty("order.commands.topic.name"), keyMessage, valueMessage);
     }
 
     // CriticalAuditSagaHandler & RollbackSagaHandler
-    public void sendSendEmailOrderCommand(@NonNull String keyMessage,
-                                          @NonNull SendEmailOrderCommand valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendSendEmailOrderCommand(String keyMessage, SendEmailOrderCommand valueMessage) {
         send(env.getRequiredProperty("email-notification.commands.topic.name"), keyMessage, valueMessage);
     }
 
     // CompensationSagaHandler & CriticalAuditSagaHandler & RollbackSagaHandler
-    public void sendRefundPaymentCommand(@NonNull String keyMessage,
-                                         @NonNull RefundPaymentCommand valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendRefundPaymentCommand(String keyMessage, RefundPaymentCommand valueMessage) {
         send(env.getRequiredProperty("payment.commands.topic.name"), keyMessage, valueMessage);
     }
 
     // CompensationSagaHandler
-    public void sendCancelUserBalanceDebitCommand(@NonNull String keyMessage,
-                                                  @NonNull CancelUserBalanceDebitCommand valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendCancelUserBalanceDebitCommand(String keyMessage, CancelUserBalanceDebitCommand valueMessage) {
         send(env.getRequiredProperty("user.commands.topic.name"), keyMessage, valueMessage);
     }
 
     // CompensationSagaHandler & CriticalAuditSagaHandler & RollbackSagaHandler
-    public void sendRejectOrderCommand(@NonNull String keyMessage,
-                                       @NonNull RejectOrderCommand valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendRejectOrderCommand(String keyMessage, RejectOrderCommand valueMessage) {
         send(env.getRequiredProperty("order.commands.topic.name"), keyMessage, valueMessage);
     }
 
     // CompensationSagaHandler & CriticalAuditSagaHandler & RollbackSagaHandler
-    public void sendCancelProductReservationCommand(@NonNull String keyMessage,
-                                                    @NonNull CancelProductReservationCommand valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendCancelProductReservationCommand(String keyMessage, CancelProductReservationCommand valueMessage) {
         send(env.getRequiredProperty("product.commands.topic.name"), keyMessage, valueMessage);
     }
 

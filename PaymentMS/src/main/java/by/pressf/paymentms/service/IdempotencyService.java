@@ -5,10 +5,12 @@ import by.pressf.paymentms.dao.entity.EventEntity;
 import by.pressf.paymentms.dao.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@NullMarked
 @RequiredArgsConstructor
 public class IdempotencyService {
     private final EventRepository eventRepository;

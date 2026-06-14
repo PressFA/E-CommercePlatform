@@ -3,32 +3,31 @@ package by.pressf.userms.service;
 import by.pressf.core.dto.choreography.events.UserBalanceCreditedEvent;
 import by.pressf.userms.dao.entity.UserEntity;
 import by.pressf.userms.dao.repository.UserRepository;
+import by.pressf.userms.dto.incoming.CreateUserRequest;
+import by.pressf.userms.dto.incoming.TopUpBalanceRequest;
 import by.pressf.userms.dto.internal.UserBalanceRequest;
 import by.pressf.userms.dto.internal.UserBalanceResponse;
-import by.pressf.userms.dto.internal.UserCreationData;
 import by.pressf.userms.exception.InsufficientBalanceException;
 import by.pressf.userms.exception.UserNotFoundException;
 import by.pressf.userms.kafka.publisher.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
 @Service
+@NullMarked
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final KafkaEventPublisher kafkaEventPublisher;
 
     @Transactional("transactionManager")
-    public UUID createUser(@NonNull UserCreationData userData) {
-        Objects.requireNonNull(userData, "UserCreationData must not be null");
-
+    public UUID createUser(CreateUserRequest userData) {
         UserEntity userEntity = UserEntity.builder()
                 .username(userData.username())
                 .password(userData.password())
@@ -41,9 +40,7 @@ public class UserService {
     }
 
     @Transactional("transactionManager")
-    public UserBalanceResponse topUpUserBalance(@NonNull UserBalanceRequest req) {
-        Objects.requireNonNull(req, "UserBalanceRequest must not be null");
-
+    public UserBalanceResponse topUpUserBalance(TopUpBalanceRequest req) {
         UserEntity user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new UserNotFoundException(req.userId()));
 
@@ -63,9 +60,7 @@ public class UserService {
         return new UserBalanceResponse(user.getName(), user.getBalance());
     }
 
-    public void cancelTopUpUserBalance(@NonNull UserBalanceRequest req) {
-        Objects.requireNonNull(req, "UserBalanceRequest must not be null");
-
+    public void cancelTopUpUserBalance(UserBalanceRequest req) {
         UserEntity user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new UserNotFoundException(req.userId()));
 
@@ -73,9 +68,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void debitUserBalance(@NonNull UserBalanceRequest req) {
-        Objects.requireNonNull(req, "UserBalanceRequest must not be null");
-
+    public void debitUserBalance(UserBalanceRequest req) {
         UserEntity user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new UserNotFoundException(req.userId()));
 
@@ -87,9 +80,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void creditUserBalance(@NonNull UserBalanceRequest req) {
-        Objects.requireNonNull(req, "UserBalanceRequest must not be null");
-
+    public void creditUserBalance(UserBalanceRequest req) {
         UserEntity user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new UserNotFoundException(req.userId()));
 

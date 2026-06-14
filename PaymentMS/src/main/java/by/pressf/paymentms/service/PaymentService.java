@@ -9,21 +9,18 @@ import by.pressf.paymentms.exception.PaymentNotFoundByOrderIdException;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 @Slf4j
 @Service
+@NullMarked
 @RequiredArgsConstructor
 public class PaymentService {
     private final StripeService stripeService;
     private final PaymentRepository paymentRepository;
 
-    public void createOrderPayment(@NonNull CreateOrderPaymentRequest req) {
-        Objects.requireNonNull(req, "CreateOrderPaymentRequest must not be null");
-
+    public void createOrderPayment(CreateOrderPaymentRequest req) {
         try {
             log.info("Sending a payment to a bank gateway");
             String stripeId = stripeService.createPayment(new StripeOrderPaymentDto(req.idempotencyKey(), req.amount()));
@@ -44,9 +41,7 @@ public class PaymentService {
         }
     }
 
-    public void refundOrderPayment(@NonNull RefundPaymentRequest req) {
-        Objects.requireNonNull(req, "RefundPaymentRequest must not be null");
-
+    public void refundOrderPayment(RefundPaymentRequest req) {
         try {
             PaymentEntity payment = paymentRepository.findByOrderId(req.orderId());
 
@@ -73,9 +68,7 @@ public class PaymentService {
         }
     }
 
-    public void topUpBalance(@NonNull UserBalanceRequest req) {
-        Objects.requireNonNull(req, "UserBalanceRequest must not be null");
-
+    public void topUpBalance(UserBalanceRequest req) {
         try {
             log.info("Sending a balance top-up request to the bank gateway");
             String stripeId = stripeService.createTopUpPayment(new StripeUserPaymentDto(req.idempotencyKey(), req.amount()));

@@ -5,34 +5,26 @@ import by.pressf.core.dto.orchestration.events.product.ProductReservedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class KafkaEventPublisher {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void sendProductReservedEvent(@NonNull String keyMessage,
-                                         @NonNull ProductReservedEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendProductReservedEvent(String keyMessage, ProductReservedEvent valueMessage) {
         send(env.getRequiredProperty("successful-events.topic.name"), keyMessage, valueMessage);
     }
 
-    public void sendProductReservationCanceledEvent(@NonNull String keyMessage,
-                                                    @NonNull ProductReservationCanceledEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendProductReservationCanceledEvent(String keyMessage, ProductReservationCanceledEvent valueMessage) {
         send(env.getRequiredProperty("compensating-events.topic.name"), keyMessage, valueMessage);
     }
 

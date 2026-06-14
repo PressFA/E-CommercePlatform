@@ -4,6 +4,7 @@ import by.pressf.core.dto.orchestration.events.order.OrderRejectedEvent;
 import by.pressf.core.dto.orchestration.events.payment.PaymentRefundedEvent;
 import by.pressf.core.dto.orchestration.events.product.ProductReservationCanceledEvent;
 import by.pressf.core.dto.orchestration.events.user.UserBalanceDebitCanceledEvent;
+import by.pressf.core.exceptions.DuplicateMessageException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.orderms.saga.handler.RollbackSagaHandler;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,8 @@ public class RollbackSagaListener { // Здесь события на продо
             log.warn("The OrderRejectedEvent event from the compensating-events topic has been received");
 
             handler.handleOrderRejectedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -42,6 +45,8 @@ public class RollbackSagaListener { // Здесь события на продо
             log.warn("The ProductReservationCanceledEvent event from the compensating-events topic has been received");
 
             handler.handleProductReservationCanceledEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -55,6 +60,8 @@ public class RollbackSagaListener { // Здесь события на продо
             log.warn("The PaymentRefundedEvent event from the compensating-events topic has been received");
 
             handler.handlePaymentRefundedEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);
@@ -68,6 +75,8 @@ public class RollbackSagaListener { // Здесь события на продо
             log.warn("The UserBalanceDebitCanceledEvent event from the compensating-events topic has been received");
 
             handler.handleUserBalanceDebitCanceledEvent(event, messageId);
+        } catch (DuplicateMessageException e) {
+            log.warn(e.getMessage());
         } catch (DataAccessException e) {
             log.error(e.getMessage());
             throw new NotRetryableException(e);

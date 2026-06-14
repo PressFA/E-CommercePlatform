@@ -14,14 +14,13 @@ import by.pressf.orderms.service.IdempotencyService;
 import by.pressf.orderms.service.OrderHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class RollbackSagaHandler {
     private final IdempotencyService idempotencyService;
@@ -29,11 +28,7 @@ public class RollbackSagaHandler {
     private final KafkaCommandPublisher kafkaCommandPublisher;
 
     @Transactional("transactionManager")
-    public void handleOrderRejectedEvent(@NonNull OrderRejectedEvent event,
-                                         @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleOrderRejectedEvent(OrderRejectedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.SUCCESS,
@@ -56,11 +51,7 @@ public class RollbackSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleProductReservationCanceledEvent(@NonNull ProductReservationCanceledEvent event,
-                                                      @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleProductReservationCanceledEvent(ProductReservationCanceledEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.SUCCESS,
@@ -73,11 +64,7 @@ public class RollbackSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handlePaymentRefundedEvent(@NonNull PaymentRefundedEvent event,
-                                           @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handlePaymentRefundedEvent(PaymentRefundedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.SUCCESS,
@@ -90,11 +77,7 @@ public class RollbackSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleUserBalanceDebitCanceledEvent(@NonNull UserBalanceDebitCanceledEvent event,
-                                                    @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleUserBalanceDebitCanceledEvent(UserBalanceDebitCanceledEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         orderHistoryService.createHistoryLog(event.orderId(), OrderHistoryStatus.SUCCESS,

@@ -10,15 +10,15 @@ import by.pressf.productms.service.IdempotencyService;
 import by.pressf.productms.service.ProductHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class ProductCommandsHandler {
     private final KafkaEventPublisher kafkaEventPublisher;
@@ -26,11 +26,7 @@ public class ProductCommandsHandler {
     private final ProductHistoryService productHistoryService;
 
     @Transactional("transactionManager")
-    public void handleReserveProductCommand(@NonNull ReserveProductCommand command,
-                                            @NonNull String messageId) {
-        Objects.requireNonNull(command);
-        Objects.requireNonNull(messageId);
-
+    public void handleReserveProductCommand(ReserveProductCommand command, String messageId) {
         idempotencyService.idempotenceCheck(messageId, command.getClass().getSimpleName());
 
         ProductReservationRequest productReservation = new ProductReservationRequest(
@@ -55,11 +51,7 @@ public class ProductCommandsHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleCancelProductReservationCommand(@NonNull CancelProductReservationCommand command,
-                                                      @NonNull String messageId) {
-        Objects.requireNonNull(command);
-        Objects.requireNonNull(messageId);
-
+    public void handleCancelProductReservationCommand(CancelProductReservationCommand command, String messageId) {
         idempotencyService.idempotenceCheck(messageId, command.getClass().getSimpleName());
 
         productHistoryService.cancelProductReservation(command.orderId());

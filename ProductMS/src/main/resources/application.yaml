@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: ProductMs
+    name: ProductMS
   config:
     import:
       - classpath:application-db.yaml # Database (H2)

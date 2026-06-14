@@ -10,14 +10,13 @@ import by.pressf.userms.service.IdempotencyService;
 import by.pressf.userms.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class UserCommandsHandler {
     private final UserService userService;
@@ -25,11 +24,7 @@ public class UserCommandsHandler {
     private final IdempotencyService idempotencyService;
 
     @Transactional("transactionManager")
-    public void handleDebitUserBalanceCommand(@NonNull DebitUserBalanceCommand command,
-                                              @NonNull String messageId) {
-        Objects.requireNonNull(command);
-        Objects.requireNonNull(messageId);
-
+    public void handleDebitUserBalanceCommand(DebitUserBalanceCommand command, String messageId) {
         idempotencyService.idempotenceCheck(messageId, command.getClass().getSimpleName());
 
         userService.debitUserBalance(new UserBalanceRequest(command.userId(), command.amount()));
@@ -48,11 +43,7 @@ public class UserCommandsHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleCancelUserBalanceDebitCommand(@NonNull CancelUserBalanceDebitCommand command,
-                                                    @NonNull String messageId) {
-        Objects.requireNonNull(command);
-        Objects.requireNonNull(messageId);
-
+    public void handleCancelUserBalanceDebitCommand(CancelUserBalanceDebitCommand command, String messageId) {
         idempotencyService.idempotenceCheck(messageId, command.getClass().getSimpleName());
 
         userService.creditUserBalance(new UserBalanceRequest(command.userId(), command.amount()));

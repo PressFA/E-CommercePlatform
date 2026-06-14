@@ -73,9 +73,12 @@ public class OrderHistoryRepositoryUnitTests {
 
     private static Stream<Arguments> save_NullArgument() {
         return Stream.of(
-                Arguments.of(new OrderHistoryEntity(null, null, OrderHistoryStatus.SUCCESS, null, "reason")),
-                Arguments.of(new OrderHistoryEntity(null, UUID.randomUUID(), null, null, "reason")),
-                Arguments.of(new OrderHistoryEntity(null, UUID.randomUUID(), OrderHistoryStatus.SUCCESS, null, null))
+                Arguments.of(new OrderHistoryEntity(null, null,
+                        OrderHistoryStatus.SUCCESS, null, "reason")),
+                Arguments.of(new OrderHistoryEntity(null, UUID.randomUUID(),
+                        null, null, "reason")),
+                Arguments.of(new OrderHistoryEntity(null, UUID.randomUUID(),
+                        OrderHistoryStatus.SUCCESS, null, null))
         );
     }
 

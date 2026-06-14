@@ -86,12 +86,18 @@ class PaymentRepositoryUnitTests {
         return Stream.of(
                 Arguments.of(List.of()),
                 Arguments.of(List.of(
-                        new PaymentEntity(null, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID().toString(),
-                                new BigDecimal("99.99"), LocalDateTime.now(), PaymentType.PAYMENT),
-                        new PaymentEntity(null, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID().toString(),
-                                new BigDecimal("89.99"), LocalDateTime.now(), PaymentType.TOP_UP),
-                        new PaymentEntity(null, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID().toString(),
-                                new BigDecimal("79.99"), LocalDateTime.now(), PaymentType.REFUND)
+                        new PaymentEntity(
+                                null, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID().toString(),
+                                new BigDecimal("99.99"), LocalDateTime.now(), PaymentType.PAYMENT
+                        ),
+                        new PaymentEntity(
+                                null, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID().toString(),
+                                new BigDecimal("89.99"), LocalDateTime.now(), PaymentType.TOP_UP
+                        ),
+                        new PaymentEntity(
+                                null, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID().toString(),
+                                new BigDecimal("79.99"), LocalDateTime.now(), PaymentType.REFUND
+                        )
                 ))
         );
     }
@@ -164,10 +170,10 @@ class PaymentRepositoryUnitTests {
                         new BigDecimal("99.99"), null, PaymentType.PAYMENT)),
                 Arguments.of(new PaymentEntity(null, UUID.randomUUID(), null, null,
                         new BigDecimal("99.99"), null, PaymentType.PAYMENT)),
-                Arguments.of(new PaymentEntity(null, UUID.randomUUID(), null, UUID.randomUUID().toString(),
-                        null, null, PaymentType.PAYMENT)),
-                Arguments.of(new PaymentEntity(null, UUID.randomUUID(), null, UUID.randomUUID().toString(),
-                        new BigDecimal("99.99"), null, null))
+                Arguments.of(new PaymentEntity(null, UUID.randomUUID(), null,
+                        UUID.randomUUID().toString(), null, null, PaymentType.PAYMENT)),
+                Arguments.of(new PaymentEntity(null, UUID.randomUUID(), null,
+                        UUID.randomUUID().toString(), new BigDecimal("99.99"), null, null))
         );
     }
 

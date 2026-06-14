@@ -7,50 +7,34 @@ import by.pressf.core.dto.orchestration.events.user.UserBalanceDebitedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.core.env.Environment;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class KafkaEventPublisher {
     private final Environment env;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    public void sendUserBalanceCreditedEvent(@NonNull String keyMessage,
-                                             @NonNull UserBalanceCreditedEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendUserBalanceCreditedEvent(String keyMessage, UserBalanceCreditedEvent valueMessage) {
         send(env.getRequiredProperty("r-payment-w-user.topic.name"), keyMessage, valueMessage);
     }
 
-    public void sendMessageUserBalanceDebitedEvent(@NonNull String keyMessage,
-                                                   @NonNull UserBalanceDebitedEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendMessageUserBalanceDebitedEvent(String keyMessage, UserBalanceDebitedEvent valueMessage) {
         send(env.getRequiredProperty("successful-events.topic.name"), keyMessage, valueMessage);
     }
 
-    public void sendMessageUserBalanceDebitCanceledEvent(@NonNull String keyMessage,
-                                                         @NonNull UserBalanceDebitCanceledEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendMessageUserBalanceDebitCanceledEvent(String keyMessage, UserBalanceDebitCanceledEvent valueMessage) {
         send(env.getRequiredProperty("compensating-events.topic.name"), keyMessage, valueMessage);
     }
 
-    public void sendMessageBalanceTopUpFailedEvent(@NonNull String keyMessage,
-                                                   @NonNull BalanceTopUpFailedEvent valueMessage) {
-        Objects.requireNonNull(keyMessage);
-        Objects.requireNonNull(valueMessage);
-
+    public void sendMessageBalanceTopUpFailedEvent(String keyMessage, BalanceTopUpFailedEvent valueMessage) {
         send(env.getRequiredProperty("r-email-w-user.topic.name"), keyMessage, valueMessage);
     }
 

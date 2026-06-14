@@ -9,24 +9,22 @@ import by.pressf.orderms.exception.OrderNotFoundException;
 import by.pressf.orderms.kafka.publisher.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
 @Service
+@NullMarked
 @RequiredArgsConstructor
 public class OrderService {
     private final OrderRepository orderRepository;
     private final KafkaEventPublisher kafkaEventPublisher;
 
     @Transactional("transactionManager")
-    public UUID createOrder(@NonNull OrderCreationData creationData) {
-        Objects.requireNonNull(creationData, "OrderCreationData must not be null");
-
+    public UUID createOrder(OrderCreationData creationData) {
         OrderEntity orderEntity = OrderEntity.builder()
                 .userId(creationData.userId())
                 .productId(creationData.productId())
@@ -49,9 +47,7 @@ public class OrderService {
         return orderEntity.getId();
     }
 
-    public void approveOrder(@NonNull UUID orderId) {
-        Objects.requireNonNull(orderId, "orderId must not be null");
-
+    public void approveOrder(UUID orderId) {
         OrderEntity entity = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 
@@ -60,9 +56,7 @@ public class OrderService {
         orderRepository.save(entity);
     }
 
-    public void rejectOrder(@NonNull UUID orderId) {
-        Objects.requireNonNull(orderId, "orderId must not be null");
-
+    public void rejectOrder(UUID orderId) {
         OrderEntity entity = orderRepository.findById(orderId)
                 .orElseThrow(() -> new OrderNotFoundException(orderId));
 

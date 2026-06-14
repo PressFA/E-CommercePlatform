@@ -10,18 +10,16 @@ import com.stripe.net.RequestOptions;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.RefundCreateParams;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 @Slf4j
 @Service
+@NullMarked
 public class StripeService {
-    public String createPayment(@NonNull StripeOrderPaymentDto dto) throws StripeException {
-        Objects.requireNonNull(dto, "StripeOrderPaymentDto must not be null");
-
+    public String createPayment(StripeOrderPaymentDto dto) throws StripeException {
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(dto.amount().multiply(new BigDecimal("100")).longValue())
                 .setCurrency("usd")
@@ -39,9 +37,7 @@ public class StripeService {
         return paymentIntent.getId();
     }
 
-    public String createRefundPayment(@NonNull StripeRefundDto dto) throws StripeException {
-        Objects.requireNonNull(dto, "StripeRefundDto must not be null");
-
+    public String createRefundPayment(StripeRefundDto dto) throws StripeException {
         RefundCreateParams params = RefundCreateParams.builder()
                 .setPaymentIntent(dto.stripeId())
                 .build();
@@ -54,9 +50,7 @@ public class StripeService {
         return refund.getId();
     }
 
-    public String createTopUpPayment(@NonNull StripeUserPaymentDto dto) throws StripeException {
-        Objects.requireNonNull(dto, "StripeUserPaymentDto must not be null");
-
+    public String createTopUpPayment(StripeUserPaymentDto dto) throws StripeException {
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
                 .setAmount(dto.amount().multiply(new BigDecimal("100")).longValue())
                 .setCurrency("usd")

@@ -11,14 +11,13 @@ import by.pressf.paymentms.service.IdempotencyService;
 import by.pressf.paymentms.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class PaymentCommandsHandler {
     private final PaymentService paymentService;
@@ -26,10 +25,7 @@ public class PaymentCommandsHandler {
     private final IdempotencyService idempotencyService;
 
     @Transactional("transactionManager")
-    public void handleChargePaymentCommand(@NonNull ChargePaymentCommand command, @NonNull String messageId) {
-        Objects.requireNonNull(command);
-        Objects.requireNonNull(messageId);
-
+    public void handleChargePaymentCommand(ChargePaymentCommand command, String messageId) {
         idempotencyService.idempotenceCheck(messageId, command.getClass().getSimpleName());
 
         CreateOrderPaymentRequest request = new CreateOrderPaymentRequest(
@@ -55,10 +51,7 @@ public class PaymentCommandsHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleRefundPaymentCommand(@NonNull RefundPaymentCommand command, @NonNull String messageId) {
-        Objects.requireNonNull(command);
-        Objects.requireNonNull(messageId);
-
+    public void handleRefundPaymentCommand(RefundPaymentCommand command, String messageId) {
         idempotencyService.idempotenceCheck(messageId, command.getClass().getSimpleName());
 
         RefundPaymentRequest refundPaymentRequest = new RefundPaymentRequest(messageId, command.orderId());

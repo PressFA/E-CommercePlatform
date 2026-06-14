@@ -8,14 +8,13 @@ import by.pressf.paymentms.service.IdempotencyService;
 import by.pressf.paymentms.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class PaymentEventsHandler {
     private final PaymentService paymentService;
@@ -23,10 +22,7 @@ public class PaymentEventsHandler {
     private final IdempotencyService idempotencyService;
 
     @Transactional("transactionManager")
-    public void handleUserBalanceCreditedEvent(@NonNull UserBalanceCreditedEvent event, @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleUserBalanceCreditedEvent(UserBalanceCreditedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         paymentService.topUpBalance(new UserBalanceRequest(messageId, event.userId(), event.amount()));

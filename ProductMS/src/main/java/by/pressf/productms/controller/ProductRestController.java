@@ -2,9 +2,7 @@ package by.pressf.productms.controller;
 
 import by.pressf.productms.dto.incoming.CreateProductRequest;
 import by.pressf.productms.dto.incoming.PatchProductRequest;
-import by.pressf.productms.dto.internal.ProductCreationData;
 import by.pressf.productms.dto.internal.ProductData;
-import by.pressf.productms.dto.internal.ProductPatchingData;
 import by.pressf.productms.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -26,15 +25,9 @@ public class ProductRestController {
     public ResponseEntity<?> createProduct(@RequestBody @Valid CreateProductRequest req) {
         log.info("A request was received to add a product with the name {} to the catalog", req.name());
 
-        ProductCreationData productCreationData = new ProductCreationData(
-                req.name(),
-                req.quantity(),
-                req.price()
-        );
+        UUID productId = productService.createProduct(req);
 
-        UUID productId = productService.createProduct(productCreationData);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(productId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("productId", productId));
     }
 
     @PatchMapping
@@ -42,13 +35,7 @@ public class ProductRestController {
         log.info("A request was received to update the quantity and/or price of an item with the {} ID",
                 req.productId());
 
-        ProductPatchingData productPatchingData = new ProductPatchingData(
-                req.productId(),
-                req.quantity(),
-                req.price()
-        );
-
-        ProductData data = productService.patchProduct(productPatchingData);
+        ProductData data = productService.patchProduct(req);
 
         return ResponseEntity.status(HttpStatus.OK).body(data);
     }

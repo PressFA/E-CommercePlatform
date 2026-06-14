@@ -14,14 +14,13 @@ import by.pressf.orderms.service.IdempotencyService;
 import by.pressf.orderms.service.OrderHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
 @Component
+@NullMarked
 @RequiredArgsConstructor
 public class CriticalAuditSagaHandler {
     private final IdempotencyService idempotencyService;
@@ -29,11 +28,7 @@ public class CriticalAuditSagaHandler {
     private final KafkaCommandPublisher kafkaCommandPublisher;
 
     @Transactional("transactionManager")
-    public void handleOrderRejectionFailedEvent(@NonNull OrderRejectionFailedEvent event,
-                                                @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleOrderRejectionFailedEvent(OrderRejectionFailedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         log.error("An error occurred while compensating for a transaction in the OrderMS for an order with the ID {}",
@@ -57,11 +52,7 @@ public class CriticalAuditSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleProductReservationCancelFailedEvent(@NonNull ProductReservationCancelFailedEvent event,
-                                                          @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleProductReservationCancelFailedEvent(ProductReservationCancelFailedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         log.error("An error occurred while compensating for a transaction in the ProductMS for an order with the ID {}",
@@ -77,11 +68,7 @@ public class CriticalAuditSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handlePaymentRefundFailedEvent(@NonNull PaymentRefundFailedEvent event,
-                                               @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handlePaymentRefundFailedEvent(PaymentRefundFailedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         log.error("An error occurred while compensating for a transaction in the PaymentMS for an order with the ID {}",
@@ -97,11 +84,7 @@ public class CriticalAuditSagaHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleUserBalanceDebitCancelFailedEvent(@NonNull UserBalanceDebitCancelFailedEvent event,
-                                                        @NonNull String messageId) {
-        Objects.requireNonNull(event);
-        Objects.requireNonNull(messageId);
-
+    public void handleUserBalanceDebitCancelFailedEvent(UserBalanceDebitCancelFailedEvent event, String messageId) {
         idempotencyService.idempotenceCheck(messageId, event.getClass().getSimpleName());
 
         log.error("An error occurred while compensating for a transaction in the UserMS for an order with the ID {}",

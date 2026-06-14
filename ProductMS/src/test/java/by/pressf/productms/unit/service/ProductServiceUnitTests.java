@@ -2,9 +2,9 @@ package by.pressf.productms.unit.service;
 
 import by.pressf.productms.dao.entity.ProductEntity;
 import by.pressf.productms.dao.repository.ProductRepository;
-import by.pressf.productms.dto.internal.ProductCreationData;
+import by.pressf.productms.dto.incoming.CreateProductRequest;
+import by.pressf.productms.dto.incoming.PatchProductRequest;
 import by.pressf.productms.dto.internal.ProductData;
-import by.pressf.productms.dto.internal.ProductPatchingData;
 import by.pressf.productms.exception.ProductNotFoundException;
 import by.pressf.productms.exception.ProductOverflowException;
 import by.pressf.productms.service.ProductService;
@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,25 +31,14 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ProductServiceUnitTests {
-    @Mock
-    private ProductRepository productRepository;
-    @InjectMocks
-    private ProductService productService;
-
-    @ParameterizedTest @NullSource
-    void createProduct_CreationDataIsNull_ThrowsNpe(ProductCreationData creationData) {
-        // Arrange & Act & Assert
-        assertThrows(NullPointerException.class,
-                () -> productService.createProduct(creationData));
-
-        verify(productRepository, never()).save(any(ProductEntity.class));
-    }
+    private @Mock ProductRepository productRepository;
+    private @InjectMocks ProductService productService;
 
     @Test
     void createProduct_RepositoryThrowsException_PropagatesException() {
         // Arrange
-        ProductCreationData creationData =
-                new ProductCreationData("seedlings", 10, new BigDecimal("100.00"));
+        CreateProductRequest creationData =
+                new CreateProductRequest("seedlings", 10, new BigDecimal("100.00"));
 
         when(productRepository.save(any(ProductEntity.class)))
                 .thenThrow(new DataIntegrityViolationException(null));
@@ -65,8 +53,8 @@ public class ProductServiceUnitTests {
     @Test
     void createProduct_ValidData_ReturnsGeneratedId() {
         // Arrange
-        ProductCreationData creationData =
-                new ProductCreationData("seedlings", 10, new BigDecimal("100.00"));
+        CreateProductRequest creationData =
+                new CreateProductRequest("seedlings", 10, new BigDecimal("100.00"));
 
         doAnswer(invocation -> {
             ProductEntity entity = invocation.getArgument(0);
@@ -82,21 +70,11 @@ public class ProductServiceUnitTests {
         verify(productRepository, times(1)).save(any(ProductEntity.class));
     }
 
-    @ParameterizedTest @NullSource
-    void patchProduct_PatchingDataIsNull_ThrowsNpe(ProductPatchingData patchingData) {
-        // Arrange & Act & Assert
-        assertThrows(NullPointerException.class,
-                () -> productService.patchProduct(patchingData));
-
-        verify(productRepository, never()).findById(any(UUID.class));
-        verify(productRepository, never()).save(any(ProductEntity.class));
-    }
-
     @Test
     void patchProduct_ProductNotFound_ThrowsNotFoundException() {
         // Arrange
-        ProductPatchingData patchingData =
-                new ProductPatchingData(UUID.randomUUID(), 99, new BigDecimal("99.99"));
+        PatchProductRequest patchingData =
+                new PatchProductRequest(UUID.randomUUID(), 99, new BigDecimal("99.99"));
 
         when(productRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.empty());
@@ -110,7 +88,8 @@ public class ProductServiceUnitTests {
     }
 
     @ParameterizedTest @MethodSource("createArgForMethodPatchProduct")
-    void patchProduct_TotalQuantityExceedsLimit_ThrowsProductOverflowException(ProductPatchingData patchingData, ProductEntity product) {
+    void patchProduct_TotalQuantityExceedsLimit_ThrowsProductOverflowException(PatchProductRequest patchingData,
+                                                                               ProductEntity product) {
         // Arrange
         when(productRepository.findById(any(UUID.class)))
                 .thenReturn(Optional.of(product));
@@ -124,7 +103,8 @@ public class ProductServiceUnitTests {
     }
 
     @ParameterizedTest @MethodSource("createArgForMethodPatchProduct")
-    void patchProduct_RepositorySaveFails_PropagatesException(ProductPatchingData patchingData, ProductEntity product) {
+    void patchProduct_RepositorySaveFails_PropagatesException(PatchProductRequest patchingData,
+                                                              ProductEntity product) {
         // Arrange
         product.setQuantity(1);
 
@@ -144,15 +124,19 @@ public class ProductServiceUnitTests {
     private static Stream<Arguments> createArgForMethodPatchProduct() {
         return Stream.of(
                 Arguments.of(
-                        new ProductPatchingData(UUID.randomUUID(), 99, new BigDecimal("99.99")),
-                        ProductEntity.builder().id(UUID.randomUUID()).name("seedlings").quantity(12)
-                                .price(new BigDecimal("199.99")).build()
+                        new PatchProductRequest(UUID.randomUUID(), 99, new BigDecimal("99.99")),
+                        ProductEntity.builder()
+                                .id(UUID.randomUUID())
+                                .name("seedlings")
+                                .quantity(12)
+                                .price(new BigDecimal("199.99"))
+                                .build()
                 )
         );
     }
 
     @ParameterizedTest @MethodSource("patchProduct_ValidPartialOrFullData")
-    void patchProduct_ValidPartialOrFullData_UpdatesAndReturnsCorrectData(ProductPatchingData patchingData) {
+    void patchProduct_ValidPartialOrFullData_UpdatesAndReturnsCorrectData(PatchProductRequest patchingData) {
         // Arrange
         int productQuantity = 12;
         ProductEntity product = ProductEntity.builder()
@@ -186,10 +170,10 @@ public class ProductServiceUnitTests {
 
     private static Stream<Arguments> patchProduct_ValidPartialOrFullData() {
         return Stream.of(
-                Arguments.of(new ProductPatchingData(UUID.randomUUID(), 50, new BigDecimal("99.99"))),
-                Arguments.of(new ProductPatchingData(UUID.randomUUID(), null, new BigDecimal("99.99"))),
-                Arguments.of(new ProductPatchingData(UUID.randomUUID(), 50, null)),
-                Arguments.of(new ProductPatchingData(UUID.randomUUID(), null, null))
+                Arguments.of(new PatchProductRequest(UUID.randomUUID(), 50, new BigDecimal("99.99"))),
+                Arguments.of(new PatchProductRequest(UUID.randomUUID(), null, new BigDecimal("99.99"))),
+                Arguments.of(new PatchProductRequest(UUID.randomUUID(), 50, null)),
+                Arguments.of(new PatchProductRequest(UUID.randomUUID(), null, null))
         );
     }
 }

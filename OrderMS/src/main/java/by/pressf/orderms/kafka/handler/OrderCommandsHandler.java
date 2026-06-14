@@ -9,14 +9,13 @@ import by.pressf.orderms.service.IdempotencyService;
 import by.pressf.orderms.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
-import org.springframework.stereotype.Service;
+import org.jspecify.annotations.NullMarked;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-
 @Slf4j
-@Service
+@Component
+@NullMarked
 @RequiredArgsConstructor
 public class OrderCommandsHandler {
     private final OrderService orderService;
@@ -24,11 +23,7 @@ public class OrderCommandsHandler {
     private final IdempotencyService idempotencyService;
 
     @Transactional("transactionManager")
-    public void handleConfirmOrderCommand(@NonNull ConfirmOrderCommand command,
-                                          @NonNull String messageId) {
-        Objects.requireNonNull(command);
-        Objects.requireNonNull(messageId);
-
+    public void handleConfirmOrderCommand(ConfirmOrderCommand command, String messageId) {
         idempotencyService.idempotenceCheck(messageId, command.getClass().getSimpleName());
 
         orderService.approveOrder(command.orderId());
@@ -42,11 +37,7 @@ public class OrderCommandsHandler {
     }
 
     @Transactional("transactionManager")
-    public void handleRejectOrderCommand(@NonNull RejectOrderCommand command,
-                                         @NonNull String messageId) {
-        Objects.requireNonNull(command);
-        Objects.requireNonNull(messageId);
-
+    public void handleRejectOrderCommand(RejectOrderCommand command, String messageId) {
         idempotencyService.idempotenceCheck(messageId, command.getClass().getSimpleName());
 
         orderService.rejectOrder(command.orderId());
