@@ -42,11 +42,10 @@ public class CriticalAuditSagaHandler {
         SendEmailOrderCommand command = new SendEmailOrderCommand(
                 event.username(),
                 "Couldn't place an order!",
-                bodyStr1 + bodyStr2,
-                event.orderId()
+                bodyStr1 + bodyStr2
         );
 
-        kafkaCommandPublisher.sendSendEmailOrderCommand(command.orderId().toString(), command);
+        kafkaCommandPublisher.sendSendEmailOrderCommand(event.orderId().toString(), command);
 
         idempotencyService.saveIdempotentKey(messageId, event.getClass().getSimpleName());
     }

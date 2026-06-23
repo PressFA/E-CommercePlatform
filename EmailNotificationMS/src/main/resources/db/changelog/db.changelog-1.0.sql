@@ -2,7 +2,7 @@
 
 --changeset pressf:1
 CREATE TABLE processed_messages (
-    id BIGINT,
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
     message_id VARCHAR(40) NOT NULL,
 
     CONSTRAINT PK_ProcessedMessages PRIMARY KEY (id),

@@ -55,11 +55,8 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
 
-        DefaultErrorHandler errorHandler =
-                new DefaultErrorHandler(
-                        recoverer,
-                        new FixedBackOff(3000, 3)
-                );
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer,
+                new FixedBackOff(3000, 3));
 
         errorHandler.addNotRetryableExceptions(NotRetryableException.class);
         errorHandler.addRetryableExceptions(RetryableException.class);
@@ -74,8 +71,7 @@ public class KafkaConsumerConfig {
     */
     @Bean
     DeadLetterPublishingRecoverer recoverer(KafkaTemplate<String, Object> kafkaTemplateDlt) {
-        return new DeadLetterPublishingRecoverer(
-                kafkaTemplateDlt,
+        return new DeadLetterPublishingRecoverer(kafkaTemplateDlt,
                 (consumerRecord, ex) -> {
                     log.info("The message {} has been sent to {} topic",
                             consumerRecord.value().getClass().getSimpleName(),

@@ -1,5 +1,6 @@
 package by.pressf.productms.config;
 
+import by.pressf.core.exceptions.EventException;
 import by.pressf.core.exceptions.NotRetryableException;
 import by.pressf.core.exceptions.RetryableException;
 import lombok.RequiredArgsConstructor;
@@ -56,11 +57,8 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
 
-        DefaultErrorHandler errorHandler =
-                new DefaultErrorHandler(
-                        recoverer,
-                        new FixedBackOff(3000, 3)
-                );
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer,
+                new FixedBackOff(3000, 3));
 
         errorHandler.addNotRetryableExceptions(NotRetryableException.class);
         errorHandler.addRetryableExceptions(RetryableException.class);
@@ -74,28 +72,21 @@ public class KafkaConsumerConfig {
     логику обработки сообщения перед публикацией в dead letter topic (DLT)
     */
     @Bean
-    DeadLetterPublishingRecoverer recoverer(KafkaTemplate<String, Object> kafkaTemplateDlt,
-                                            KafkaTemplate<String, Object> kafkaTemplate) {
-        return new DeadLetterPublishingRecoverer(
-                kafkaTemplateDlt,
+    DeadLetterPublishingRecoverer recoverer(KafkaTemplate<String, Object> kafkaTemplateDlt) {
+        return new DeadLetterPublishingRecoverer(kafkaTemplateDlt,
                 (consumerRecord, ex) -> {
-                    Throwable cause = ex.getCause();
-
-                    if (cause instanceof NotRetryableException e && e.getValue() != null) {
+                    if (ex.getCause() instanceof EventException e && e.getValue() != null) {
                         ProducerRecord<String, Object> record =
-                                new ProducerRecord<>(
-                                        e.getTopicName(),
-                                        e.getKey(),
-                                        e.getValue()
-                                );
+                                new ProducerRecord<>(e.getTopicName(), e.getKey(), e.getValue());
                         record.headers().add("messageId", e.getMessageId().getBytes());
 
                         try {
-                            kafkaTemplate.send(record).get();
+                            kafkaTemplateDlt.send(record).get();
                             log.info("Message {} successfully delivered to {} topic",
                                     e.getValue().getClass().getSimpleName(),
                                     e.getTopicName());
-                        } catch (Throwable sendEx) {
+                        } catch (Exception sendEx) {
+                            log.error("{}.class: {}", sendEx.getClass().getSimpleName(), sendEx.getMessage());
                             log.error("The message {} was not delivered to {} topic",
                                     e.getValue().getClass().getSimpleName(),
                                     e.getTopicName());
@@ -125,6 +116,10 @@ public class KafkaConsumerConfig {
                 env.getRequiredProperty("spring.kafka.producer.bootstrap-servers"));
         config.put(ProducerConfig.ACKS_CONFIG,
                 env.getRequiredProperty("spring.kafka.producer.acks"));
+        config.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,
+                env.getRequiredProperty("spring.kafka.producer.properties.max.in.flight.requests.per.connection"));
+        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,
+                env.getRequiredProperty("spring.kafka.producer.properties.enable.idempotence"));
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
 

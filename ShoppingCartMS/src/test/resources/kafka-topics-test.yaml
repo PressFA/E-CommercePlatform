@@ -1,0 +1,6 @@
+r-order-w-cart:
+  topic:
+    replicas: 1
+    min:
+      insync:
+        replicas: 1

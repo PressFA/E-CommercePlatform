@@ -30,7 +30,7 @@ CREATE TABLE product_history (
 
 --changeset pressf:3
 CREATE TABLE processed_messages (
-    id BIGINT,
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
     message_id VARCHAR(40) NOT NULL,
 
     CONSTRAINT PK_ProcessedMessages PRIMARY KEY (id),

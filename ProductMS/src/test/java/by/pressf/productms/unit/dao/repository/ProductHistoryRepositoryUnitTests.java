@@ -29,7 +29,12 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DataJpaTest
+@DataJpaTest(properties = {
+        "spring.jpa.hibernate.ddl-auto=create-drop",
+        "spring.jpa.show-sql=true",
+        "spring.jpa.properties.hibernate.format_sql=true",
+        "spring.liquibase.enabled=false"
+})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProductHistoryRepositoryUnitTests {
     @Autowired

@@ -20,14 +20,13 @@ CREATE TABLE orders_history (
     created_at TIMESTAMP NOT NULL,
     reason VARCHAR(255) NOT NULL,
 
-    CONSTRAINT PK_OrdersHistory PRIMARY KEY (id),
-    CONSTRAINT FK_OrdersHistory_order_id FOREIGN KEY (order_id) REFERENCES orders(id)
+    CONSTRAINT PK_OrdersHistory PRIMARY KEY (id)
 );
 --rollback DROP TABLE IF EXISTS orders_history;
 
 --changeset pressf:3
 CREATE TABLE processed_messages (
-    id BIGINT,
+    id BIGINT  GENERATED ALWAYS AS IDENTITY,
     message_id VARCHAR(40) NOT NULL,
 
     CONSTRAINT PK_ProcessedMessages PRIMARY KEY (id),

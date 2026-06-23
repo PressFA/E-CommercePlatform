@@ -18,13 +18,11 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSendException;
 
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.doThrow;
 
 @ExtendWith(MockitoExtension.class)
 public class EmailCommandsListenerUnitTests {
@@ -123,8 +121,8 @@ public class EmailCommandsListenerUnitTests {
 
     private static Stream<Arguments> arguments() {
         return Stream.of(
-                Arguments.of(new SendEmailOrderCommand("test@mail.com", "title", "text",
-                        UUID.randomUUID()), "msg-123-test")
+                Arguments.of(new SendEmailOrderCommand("test@mail.com", "title", "text"),
+                        "msg-123-test")
         );
     }
 }

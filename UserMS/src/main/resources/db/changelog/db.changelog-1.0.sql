@@ -2,7 +2,7 @@
 
 --changeset pressf:1
 CREATE TABLE users (
-    id UUID,
+    id UUID DEFAULT gen_random_uuid(),
     username VARCHAR(24) NOT NULL,
     password VARCHAR(16) NOT NULL,
     name VARCHAR(16) NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE users (
 
 --changeset pressf:2
 CREATE TABLE processed_messages (
-    id BIGINT,
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
     message_id VARCHAR(40) NOT NULL,
 
     CONSTRAINT PK_ProcessedMessages PRIMARY KEY (id),
