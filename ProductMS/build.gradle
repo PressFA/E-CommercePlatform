@@ -1,17 +1,7 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.liquibase:liquibase-core:4.31.1'
-    }
-}
-
 plugins {
     id 'java'
     id 'org.springframework.boot' version '4.0.1'
     id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.liquibase.gradle' version '3.1.0'
 }
 
 group = 'by.pressf'
@@ -21,12 +11,6 @@ description = 'ProductMS'
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
     }
 }
 
@@ -52,7 +36,6 @@ dependencies {
     runtimeOnly 'com.h2database:h2'
     runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-kafka-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-liquibase-test'
@@ -67,11 +50,6 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 
     implementation 'by.pressf:core:0.1.5-SNAPSHOT'
-
-    liquibaseRuntime 'org.liquibase:liquibase-core:4.31.1'
-    liquibaseRuntime 'org.liquibase:liquibase-groovy-dsl:4.0.1'
-    liquibaseRuntime 'info.picocli:picocli:4.6.1'
-    liquibaseRuntime 'org.postgresql:postgresql'
 }
 
 tasks.named('test') {

@@ -9,4 +9,3 @@ CREATE TABLE shopping_carts (
 
     CONSTRAINT PK_ShoppingCarts PRIMARY KEY (id)
 );
---rollback DROP TABLE IF EXISTS shopping_carts;

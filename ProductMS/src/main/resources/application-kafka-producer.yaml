@@ -1,7 +1,7 @@
 spring:
   kafka:
     producer:
-      bootstrap-servers: localhost:9092,localhost:9094,localhost:9096
+      bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
       transaction-id-prefix: product-ms-${HOSTNAME:local}- # Для корректной работы Kafka Transaction
       acks: all # Одно из условий для Idempotence Producer
       retries: 10

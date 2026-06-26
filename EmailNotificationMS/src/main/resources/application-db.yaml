@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:54326/email_db
-    username: test
-    password: test
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -10,7 +10,7 @@ spring:
     open-in-view: false
   liquibase:
     change-log: classpath:/db/changelog/db.changelog-master.yaml
-    url: jdbc:postgresql://localhost:54326/email_db
-    user: test
-    password: test
+    url: ${SPRING_DATASOURCE_URL}
+    user: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver

@@ -8,4 +8,3 @@ CREATE TABLE processed_messages (
     CONSTRAINT PK_ProcessedMessages PRIMARY KEY (id),
     CONSTRAINT UQ_ProcessedMessages_message_id UNIQUE (message_id)
 );
---rollback DROP TABLE IF EXISTS processed_messages;

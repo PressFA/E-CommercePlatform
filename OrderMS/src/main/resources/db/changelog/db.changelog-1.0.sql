@@ -10,7 +10,6 @@ CREATE TABLE orders (
 
     CONSTRAINT PK_Orders PRIMARY KEY (id)
 );
---rollback DROP TABLE IF EXISTS orders;
 
 --changeset pressf:2
 CREATE TABLE orders_history (
@@ -22,7 +21,6 @@ CREATE TABLE orders_history (
 
     CONSTRAINT PK_OrdersHistory PRIMARY KEY (id)
 );
---rollback DROP TABLE IF EXISTS orders_history;
 
 --changeset pressf:3
 CREATE TABLE processed_messages (
@@ -32,4 +30,3 @@ CREATE TABLE processed_messages (
     CONSTRAINT PK_ProcessedMessages PRIMARY KEY (id),
     CONSTRAINT UQ_ProcessedMessages_message_id UNIQUE (message_id)
 );
---rollback DROP TABLE IF EXISTS processed_messages;

@@ -11,7 +11,6 @@ CREATE TABLE products (
     CONSTRAINT PK_Products PRIMARY KEY (id),
     CONSTRAINT UQ_Products_name UNIQUE (name)
 );
---rollback DROP TABLE IF EXISTS products;
 
 --changeset pressf:2
 CREATE TABLE product_history (
@@ -26,7 +25,6 @@ CREATE TABLE product_history (
     CONSTRAINT PK_ProductHistory PRIMARY KEY (id),
     CONSTRAINT FK_ProductHistory_product_id FOREIGN KEY (product_id) REFERENCES products(id)
 );
---rollback DROP TABLE IF EXISTS product_history;
 
 --changeset pressf:3
 CREATE TABLE processed_messages (
@@ -36,4 +34,3 @@ CREATE TABLE processed_messages (
     CONSTRAINT PK_ProcessedMessages PRIMARY KEY (id),
     CONSTRAINT UQ_ProcessedMessages_message_id UNIQUE (message_id)
 );
---rollback DROP TABLE IF EXISTS processed_messages;
