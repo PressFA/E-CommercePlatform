@@ -10,12 +10,14 @@ import com.stripe.net.RequestOptions;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.RefundCreateParams;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 
 @Slf4j
 @Service
+@NullMarked
 public class StripeService {
     public String createPayment(StripeOrderPaymentDto dto) throws StripeException {
         PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()

@@ -3,16 +3,16 @@ package by.pressf.userms.service;
 import by.pressf.core.dto.choreography.events.UserBalanceCreditedEvent;
 import by.pressf.userms.dao.entity.UserEntity;
 import by.pressf.userms.dao.repository.UserRepository;
-import by.pressf.userms.dto.UserBalanceRequest;
-import by.pressf.userms.dto.UserBalanceResponse;
-import by.pressf.userms.dto.UserCreationData;
+import by.pressf.userms.dto.incoming.CreateUserRequest;
+import by.pressf.userms.dto.incoming.TopUpBalanceRequest;
+import by.pressf.userms.dto.internal.UserBalanceRequest;
+import by.pressf.userms.dto.internal.UserBalanceResponse;
 import by.pressf.userms.exception.InsufficientBalanceException;
 import by.pressf.userms.exception.UserNotFoundException;
+import by.pressf.userms.kafka.publisher.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.core.env.Environment;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +20,14 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@NullMarked
 @RequiredArgsConstructor
 public class UserService {
-    private final Environment env;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final UserRepository userRepository;
+    private final KafkaEventPublisher kafkaEventPublisher;
 
     @Transactional("transactionManager")
-    public UUID createUser(UserCreationData userData) {
+    public UUID createUser(CreateUserRequest userData) {
         UserEntity userEntity = UserEntity.builder()
                 .username(userData.username())
                 .password(userData.password())
@@ -40,7 +40,7 @@ public class UserService {
     }
 
     @Transactional("transactionManager")
-    public UserBalanceResponse topUpUserBalance(UserBalanceRequest req) {
+    public UserBalanceResponse topUpUserBalance(TopUpBalanceRequest req) {
         UserEntity user = userRepository.findById(req.userId())
                 .orElseThrow(() -> new UserNotFoundException(req.userId()));
 
@@ -55,16 +55,7 @@ public class UserService {
                 req.amount()
         );
 
-        ProducerRecord<String, Object> record =
-                new ProducerRecord<>(
-                        env.getRequiredProperty("r-payment-w-user.topic.name"),
-                        event.userId().toString(),
-                        event
-                );
-        record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
-
-        kafkaTemplate.send(record);
-        log.info("The UserBalanceCreditedEvent message was sent to the r-payment-w-user-events topic");
+        kafkaEventPublisher.sendUserBalanceCreditedEvent(event.userId().toString(), event);
 
         return new UserBalanceResponse(user.getName(), user.getBalance());
     }

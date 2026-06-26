@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Data @Builder
@@ -17,13 +18,14 @@ import java.util.UUID;
 public class OrderHistoryEntity {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(name = "order_id")
+    @Column(name = "order_id", nullable = false, updatable = false)
     private UUID orderId;
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false, length = 12)
     @Enumerated(EnumType.STRING)
     private OrderHistoryStatus status;
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-    @Column(columnDefinition = "TEXT")
+    @Builder.Default
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
+    @Column(nullable = false, updatable = false)
     private String reason;
 }

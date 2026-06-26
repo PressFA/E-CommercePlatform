@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Data @Builder
@@ -18,17 +19,18 @@ import java.util.UUID;
 public class PaymentEntity {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(name = "user_id", nullable = false)
+    @Column(name = "user_id", nullable = false, updatable = false)
     private UUID userId;
-    @Column(name = "order_id")
+    @Column(name = "order_id", updatable = false)
     private UUID orderId;
-    @Column(name = "stripe_id", nullable = false)
+    @Column(name = "stripe_id", nullable = false, updatable = false, length = 48)
     private String stripeId;
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private BigDecimal amount;
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-    @Column(nullable = false)
+    @Builder.Default
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
+    @Column(nullable = false, updatable = false, length = 12)
     @Enumerated(EnumType.STRING)
     private PaymentType type;
 }

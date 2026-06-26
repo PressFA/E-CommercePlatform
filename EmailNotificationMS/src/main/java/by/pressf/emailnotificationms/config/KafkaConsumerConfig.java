@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
-import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -56,11 +55,8 @@ public class KafkaConsumerConfig {
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory);
 
-        DefaultErrorHandler errorHandler =
-                new DefaultErrorHandler(
-                        recoverer,
-                        new FixedBackOff(3000, 3)
-                );
+        DefaultErrorHandler errorHandler = new DefaultErrorHandler(recoverer,
+                new FixedBackOff(3000, 3));
 
         errorHandler.addNotRetryableExceptions(NotRetryableException.class);
         errorHandler.addRetryableExceptions(RetryableException.class);
@@ -74,39 +70,14 @@ public class KafkaConsumerConfig {
     логику обработки сообщения перед публикацией в dead letter topic (DLT)
     */
     @Bean
-    DeadLetterPublishingRecoverer recoverer(KafkaTemplate<String, Object> kafkaTemplateDlt,
-                                            KafkaTemplate<String, Object> kafkaTemplate) {
-        return new DeadLetterPublishingRecoverer(
-                kafkaTemplateDlt,
+    DeadLetterPublishingRecoverer recoverer(KafkaTemplate<String, Object> kafkaTemplateDlt) {
+        return new DeadLetterPublishingRecoverer(kafkaTemplateDlt,
                 (consumerRecord, ex) -> {
-                    Throwable cause = ex.getCause();
-
-                    if (cause instanceof NotRetryableException e && e.getValue() != null) {
-                        ProducerRecord<String, Object> record =
-                                new ProducerRecord<>(
-                                        e.getTopicName(),
-                                        e.getKey(),
-                                        e.getValue()
-                                );
-                        record.headers().add("messageId", e.getMessageId().getBytes());
-
-                        try {
-                            kafkaTemplate.send(record).get();
-                            log.info("Message {} successfully delivered to {} topic",
-                                    e.getValue().getClass().getSimpleName(),
-                                    e.getTopicName());
-                        } catch (Throwable sendEx) {
-                            log.error("The message {} was not delivered to {} topic",
-                                    e.getValue().getClass().getSimpleName(),
-                                    e.getTopicName());
-                        }
-                    }
-
                     log.info("The message {} has been sent to {} topic",
                             consumerRecord.value().getClass().getSimpleName(),
-                            env.getRequiredProperty("order.dlt.name"));
+                            env.getRequiredProperty("email-notification.dlt.name"));
                     return new TopicPartition(
-                            env.getRequiredProperty("order.dlt.name"),
+                            env.getRequiredProperty("email-notification.dlt.name"),
                             consumerRecord.partition()
                     );
                 }

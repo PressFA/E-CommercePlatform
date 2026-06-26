@@ -1,7 +1,15 @@
 package by.pressf.core.dto.orchestration.events.user;
 
+import org.jspecify.annotations.NullMarked;
+
+import java.util.Objects;
 import java.util.UUID;
 
-public record UserBalanceDebitCanceledEvent(UUID orderID,
+@NullMarked
+public record UserBalanceDebitCanceledEvent(UUID orderId,
                                             String username) {
+    public UserBalanceDebitCanceledEvent {
+        Objects.requireNonNull(orderId, "orderId must not be null");
+        Objects.requireNonNull(username, "username must not be null");
+    }
 }

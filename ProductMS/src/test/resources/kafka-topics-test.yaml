@@ -1,0 +1,37 @@
+product:
+  commands:
+    topic:
+      replicas: 1
+      min:
+        insync:
+          replicas: 1
+  dlt:
+    replicas: 1
+    min:
+      insync:
+        replicas: 1
+
+successful-events:
+  topic:
+    replicas: 1
+    min:
+      insync:
+        replicas: 1
+errors-successful-events:
+  topic:
+    replicas: 1
+    min:
+      insync:
+        replicas: 1
+compensating-events:
+  topic:
+    replicas: 1
+    min:
+      insync:
+        replicas: 1
+errors-compensating-events:
+  topic:
+    replicas: 1
+    min:
+      insync:
+        replicas: 1

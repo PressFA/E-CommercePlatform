@@ -4,13 +4,12 @@ import by.pressf.core.dto.orchestration.events.order.OrderCreatedEvent;
 import by.pressf.orderms.dao.entity.OrderEntity;
 import by.pressf.orderms.dao.entity.status.OrderStatus;
 import by.pressf.orderms.dao.repository.OrderRepository;
-import by.pressf.orderms.dto.OrderCreationData;
+import by.pressf.orderms.dto.internal.OrderCreationData;
 import by.pressf.orderms.exception.OrderNotFoundException;
+import by.pressf.orderms.kafka.publisher.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.core.env.Environment;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +17,11 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@NullMarked
 @RequiredArgsConstructor
 public class OrderService {
-    private final Environment env;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
     private final OrderRepository orderRepository;
+    private final KafkaEventPublisher kafkaEventPublisher;
 
     @Transactional("transactionManager")
     public UUID createOrder(OrderCreationData creationData) {
@@ -43,16 +42,7 @@ public class OrderService {
                 creationData.quantity()
         );
 
-        ProducerRecord<String, Object> record =
-                new ProducerRecord<>(
-                        env.getRequiredProperty("successful-events.topic.name"),
-                        event.orderId().toString(),
-                        event
-                );
-        record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
-
-        kafkaTemplate.send(record);
-        log.info("The OrderCreatedEvent message was sent to the successful-events topic.");
+        kafkaEventPublisher.sendOrderCreatedEvent(event.orderId().toString(), event);
 
         return orderEntity.getId();
     }

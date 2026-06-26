@@ -1,0 +1,305 @@
+services:
+  kafka-1:
+    image: apache/kafka:4.3.0
+    container_name: kafka_1_container
+    ports:
+      - "9094:9094"
+    environment:
+      - KAFKA_NODE_ID=1
+      - KAFKA_CLUSTER_ID=${KAFKA_CLUSTER}
+      - KAFKA_PROCESS_ROLES=controller,broker
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka-1:9092,CONTROLLER://kafka-1:9093,EXTERNAL://localhost:9094
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    volumes:
+      - kafka_1_data:/var/lib/kafka/data
+    networks:
+      - kafka-cluster-network
+  kafka-2:
+    image: apache/kafka:4.3.0
+    container_name: kafka_2_container
+    ports:
+      - "9095:9095"
+    environment:
+      - KAFKA_NODE_ID=2
+      - KAFKA_CLUSTER_ID=${KAFKA_CLUSTER}
+      - KAFKA_PROCESS_ROLES=controller,broker
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9095
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka-2:9092,CONTROLLER://kafka-2:9093,EXTERNAL://localhost:9095
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    volumes:
+      - kafka_2_data:/var/lib/kafka/data
+    networks:
+      - kafka-cluster-network
+  kafka-3:
+    image: apache/kafka:4.3.0
+    container_name: kafka_3_container
+    ports:
+      - "9096:9096"
+    environment:
+      - KAFKA_NODE_ID=3
+      - KAFKA_CLUSTER_ID=${KAFKA_CLUSTER}
+      - KAFKA_PROCESS_ROLES=controller,broker
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9096
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka-3:9092,CONTROLLER://kafka-3:9093,EXTERNAL://localhost:9096
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+    volumes:
+      - kafka_3_data:/var/lib/kafka/data
+    networks:
+      - kafka-cluster-network
+  email-db:
+    image: postgres:18-alpine
+    container_name: email_db_container
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=email_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - email_db_data:/var/lib/postgresql/data
+    networks:
+      - email-network
+  order-db:
+    image: postgres:18-alpine
+    container_name: order_db_container
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=order_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - order_db_data:/var/lib/postgresql/data
+    networks:
+      - order-network
+  payment-db:
+    image: postgres:18-alpine
+    container_name: payment_db_container
+    ports:
+      - "5435:5432"
+    environment:
+      - POSTGRES_DB=payment_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - payment_db_data:/var/lib/postgresql/data
+    networks:
+      - payment-network
+  product-db:
+    image: postgres:18-alpine
+    container_name: product_db_container
+    ports:
+      - "5436:5432"
+    environment:
+      - POSTGRES_DB=product_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - product_db_data:/var/lib/postgresql/data
+    networks:
+      - product-network
+  cart-db:
+    image: postgres:18-alpine
+    container_name: cart_db_container
+    ports:
+      - "5437:5432"
+    environment:
+      - POSTGRES_DB=cart_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - cart_db_data:/var/lib/postgresql/data
+    networks:
+      - cart-network
+  user-db:
+    image: postgres:18-alpine
+    container_name: user_db_container
+    ports:
+      - "5438:5432"
+    environment:
+      - POSTGRES_DB=user_db
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    networks:
+      - user-network
+  email-ms:
+    build:
+      context: ./EmailNotificationMS
+      secrets:
+        - github_token
+    container_name: email_ms_container
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_MAIL_USERNAME=${SPRING_MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${SPRING_MAIL_PASSWORD}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://email-db:5432/email_db
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
+    networks:
+      - email-network
+      - kafka-cluster-network
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - email-db
+  order-ms:
+    build:
+      context: ./OrderMS
+      secrets:
+        - github_token
+    container_name: order_ms_container
+    ports:
+      - "8082:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://order-db:5432/order_db
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
+    networks:
+      - order-network
+      - kafka-cluster-network
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - order-db
+  payment-ms:
+    build:
+      context: ./PaymentMS
+      secrets:
+        - github_token
+    container_name: payment_ms_container
+    ports:
+      - "8083:8080"
+    environment:
+      - STRIPE_API_KEY=${STRIPE_API_KEY}
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://payment-db:5432/payment_db
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
+    networks:
+      - payment-network
+      - kafka-cluster-network
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - payment-db
+  product-ms:
+    build:
+      context: ./ProductMS
+      secrets:
+        - github_token
+    container_name: product_ms_container
+    ports:
+      - "8084:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://product-db:5432/product_db
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
+    networks:
+      - product-network
+      - kafka-cluster-network
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - product-db
+  cart-ms:
+    build:
+      context: ./ShoppingCartMS
+      secrets:
+        - github_token
+    container_name: cart_ms_container
+    ports:
+      - "8085:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://cart-db:5432/cart_db
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
+    networks:
+      - cart-network
+      - kafka-cluster-network
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - cart-db
+  user-ms:
+    build:
+      context: ./UserMS
+      secrets:
+        - github_token
+    container_name: user_ms_container
+    ports:
+      - "8086:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://user-db:5432/user_db
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka-1:9092,kafka-2:9092,kafka-3:9092
+    networks:
+      - user-network
+      - kafka-cluster-network
+    depends_on:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - user-db
+
+volumes:
+  kafka_1_data:
+    name: kafka_1_data
+  kafka_2_data:
+    name: kafka_2_data
+  kafka_3_data:
+    name: kafka_3_data
+  email_db_data:
+    name: email_db_data
+  order_db_data:
+    name: order_db_data
+  payment_db_data:
+    name: payment_db_data
+  product_db_data:
+    name: product_db_data
+  cart_db_data:
+    name: cart_db_data
+  user_db_data:
+    name: user_db_data
+
+networks:
+  kafka-cluster-network:
+    name: kafka-cluster-network
+  email-network:
+    name: email-network
+  order-network:
+    name: order-network
+  payment-network:
+    name: payment-network
+  product-network:
+    name: product-network
+  cart-network:
+    name: cart-network
+  user-network:
+    name: user-network
+
+secrets:
+  github_token:
+    environment: "GITHUB_TOKEN"

@@ -9,12 +9,12 @@ import by.pressf.paymentms.exception.PaymentNotFoundByOrderIdException;
 import com.stripe.exception.StripeException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
+@NullMarked
 @RequiredArgsConstructor
 public class PaymentService {
     private final StripeService stripeService;
@@ -31,7 +31,6 @@ public class PaymentService {
                     .orderId(req.orderId())
                     .stripeId(stripeId)
                     .amount(req.amount())
-                    .createdAt(LocalDateTime.now())
                     .type(PaymentType.PAYMENT)
                     .build();
 
@@ -59,7 +58,6 @@ public class PaymentService {
                     .orderId(payment.getOrderId())
                     .stripeId(stripeId)
                     .amount(payment.getAmount())
-                    .createdAt(LocalDateTime.now())
                     .type(PaymentType.REFUND)
                     .build();
 
@@ -80,7 +78,6 @@ public class PaymentService {
                     .userId(req.userId())
                     .stripeId(stripeId)
                     .amount(req.amount())
-                    .createdAt(LocalDateTime.now())
                     .type(PaymentType.TOP_UP)
                     .build();
 

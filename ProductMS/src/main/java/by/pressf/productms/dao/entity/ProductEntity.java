@@ -16,12 +16,13 @@ import java.util.UUID;
 public class ProductEntity {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, updatable = false, length = 50)
     private String name;
     @Column(nullable = false)
     private Integer quantity;
     @Column(nullable = false)
     private BigDecimal price;
     @Version
-    private int version;
+    @Column(nullable = false)
+    private Integer version;
 }

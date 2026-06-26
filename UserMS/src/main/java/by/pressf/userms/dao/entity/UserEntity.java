@@ -16,16 +16,16 @@ import java.util.UUID;
 public class UserEntity {
     @Id @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, length = 24)
     private String username;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 16)
     private String password;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 16)
     private String name;
     @Builder.Default
     @Column(nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;
     @Version
-    private int version;
+    @Column(nullable = false)
+    private Integer version;
 }
-

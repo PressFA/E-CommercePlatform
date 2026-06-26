@@ -4,14 +4,14 @@ import by.pressf.core.dto.orchestration.events.cart.CreateOrderShoppingCart;
 import by.pressf.core.exceptions.AppError;
 import by.pressf.shoppingcartms.dao.entity.CartEntity;
 import by.pressf.shoppingcartms.dao.repository.ShoppingCartRepository;
-import by.pressf.shoppingcartms.dto.CartInfo;
-import by.pressf.shoppingcartms.dto.CreateCartRequest;
-import by.pressf.shoppingcartms.dto.QuantityChangeCart;
+import by.pressf.shoppingcartms.dto.incoming.BuyProductRequest;
+import by.pressf.shoppingcartms.dto.internal.CartInfo;
+import by.pressf.shoppingcartms.dto.incoming.CreateCartRequest;
+import by.pressf.shoppingcartms.dto.incoming.QuantityChangeCart;
+import by.pressf.shoppingcartms.kafka.publisher.KafkaEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.springframework.core.env.Environment;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +20,10 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@NullMarked
 @RequiredArgsConstructor
 public class ShoppingCartService {
-    private final Environment env;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaEventPublisher kafkaEventPublisher;
     private final ShoppingCartRepository shoppingCartRepository;
 
     @Transactional(value = "transactionManager", readOnly = true)
@@ -79,30 +79,21 @@ public class ShoppingCartService {
     }
 
     @Transactional("transactionManager")
-    public void createOrderFromShoppingCart(UUID id, String username) {
-        CartEntity cart = shoppingCartRepository.findById(id)
+    public void createOrderFromShoppingCart(BuyProductRequest buyRequest) {
+        CartEntity cart = shoppingCartRepository.findById(buyRequest.id())
                 .orElseThrow(() -> new AppError(404,
-                        "Cart item with id " + id + " not found"));
+                        "Cart item with id " + buyRequest.id() + " not found"));
 
         CreateOrderShoppingCart event = new CreateOrderShoppingCart(
                 cart.getUserId(),
-                username,
+                buyRequest.username(),
                 cart.getProductId(),
                 cart.getQuantity()
         );
 
-        ProducerRecord<String, Object> record =
-                new ProducerRecord<>(
-                        env.getRequiredProperty("r-order-w-cart.topic.name"),
-                        cart.getId().toString(),
-                        event
-                );
-        record.headers().add("messageId", UUID.randomUUID().toString().getBytes());
-
-        kafkaTemplate.send(record);
-        log.info("The CreateOrderShoppingCart message was sent to the r-order-w-cart-events topic.");
+        kafkaEventPublisher.sendMessageCreateOrderShoppingCart(cart.getId().toString(), event);
 
         shoppingCartRepository.delete(cart);
-        log.info("Shopping cart item id: {} has been successfully deleted from database after order placement", id);
+        log.info("Shopping cart item id: {} has been successfully deleted from database after order placement", buyRequest.id());
     }
 }

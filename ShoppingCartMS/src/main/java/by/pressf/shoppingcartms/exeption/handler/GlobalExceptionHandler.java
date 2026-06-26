@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +21,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleValidation(MethodArgumentNotValidException ex) {
         BindingResult bindingResult = ex.getBindingResult();
         log.error("Failed validation: {}", bindingResult.getFieldErrors());
-        Map<String, Object> errors = new HashMap<>();
+        Map<String, String> errors = new HashMap<>();
         bindingResult.getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage())
         );
@@ -31,13 +32,31 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AppError.class)
     public ResponseEntity<?> handleAppError(AppError ex) {
         log.error(ex.getMessage());
+
         return ResponseEntity.status(ex.getStatus()).body(ex);
     }
 
     @ExceptionHandler(DataAccessException.class)
-    public ResponseEntity<?> handleDatabaseErrors(Exception ex) {
+    public ResponseEntity<?> handleDatabaseErrors(DataAccessException ex) {
         log.error(ex.getMessage());
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Internal server database error"));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<?> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+        log.error(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Invalid parameter type"));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleGeneralException(Exception ex) {
+        log.error("{}.class: {}", ex.getClass().getSimpleName(), ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "An unexpected error occurred"));
     }
 }

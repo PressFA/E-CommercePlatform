@@ -6,17 +6,11 @@ plugins {
 
 group = 'by.pressf'
 version = '0.0.1-SNAPSHOT'
-description = 'ProductMs'
+description = 'ProductMS'
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(21)
-    }
-}
-
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
     }
 }
 
@@ -25,7 +19,7 @@ repositories {
         url = uri("https://maven.pkg.github.com/pressfa/e-commerceplatformlibrary")
         credentials {
             username = "PressFA"
-            password = "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"
+            password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("githubToken")
         }
     }
     mavenCentral()
@@ -35,17 +29,27 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-h2console'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-kafka'
-    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-liquibase'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-kafka-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-liquibase-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-kafka'
+    testImplementation 'org.testcontainers:testcontainers-postgresql'
+    testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
-    implementation 'by.pressf:core:0.1.1-SNAPSHOT'
+    implementation 'by.pressf:core:0.1.5-SNAPSHOT'
 }
 
 tasks.named('test') {

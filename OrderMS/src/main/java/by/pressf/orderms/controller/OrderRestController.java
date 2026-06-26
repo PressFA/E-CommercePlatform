@@ -1,7 +1,7 @@
 package by.pressf.orderms.controller;
 
-import by.pressf.orderms.dto.CreateOrderRequest;
-import by.pressf.orderms.dto.OrderCreationData;
+import by.pressf.orderms.dto.incoming.CreateOrderRequest;
+import by.pressf.orderms.dto.internal.OrderCreationData;
 import by.pressf.orderms.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -36,6 +37,6 @@ public class OrderRestController {
 
         UUID orderId = orderService.createOrder(orderCreationData);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("orderId", orderId));
     }
 }
